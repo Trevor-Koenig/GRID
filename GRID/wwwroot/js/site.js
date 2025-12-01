@@ -1,7 +1,7 @@
-﻿// Please see documentation at https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
-// for details on configuring this project to bundle and minify static web assets.
+﻿ //Please see documentation at https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
+ //for details on configuring this project to bundle and minify static web assets.
 
-// Write your JavaScript code.
+ //Write your JavaScript code.
 const lightModeBtn = document.getElementById('lightModeBtn');
 const darkModeBtn = document.getElementById('darkModeBtn');
 const htmlElement = document.documentElement; // Targets the <html> element
