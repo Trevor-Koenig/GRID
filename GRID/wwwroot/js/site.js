@@ -9,15 +9,11 @@ const htmlElement = document.documentElement; // Targets the <html> element
 lightModeBtn.addEventListener('click', () => {
     htmlElement.setAttribute('data-bs-theme', 'light');
     localStorage.setItem('bootstrapTheme', 'light'); // Optional: store preference
-    lightModeBtn.hidden = true;
-    darkModeBtn.hidden = false;
 });
 
 darkModeBtn.addEventListener('click', () => {
     htmlElement.setAttribute('data-bs-theme', 'dark');
     localStorage.setItem('bootstrapTheme', 'dark'); // Optional: store preference
-    lightModeBtn.hidden = false;
-    darkModeBtn.hidden = true;
 });
 
 // Optional: Load saved theme preference on page load
@@ -31,6 +27,4 @@ document.addEventListener('DOMContentLoaded', () => {
         // Set a default theme if no preference is saved
         htmlElement.setAttribute('data-bs-theme', 'dark');
     }
-    lightModeBtn.hidden = showDarkBtn;
-    darkModeBtn.hidden = !showDarkBtn;
 });

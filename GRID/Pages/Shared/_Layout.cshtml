@@ -35,12 +35,12 @@
 
             <nav id="navmenu" class="navmenu">
                 <ul>
-                    <li><a href="#hero" class="active">Home<br></a></li>
-                    <li><a href="#about">About</a></li>
-                    <li><a href="#services">Services</a></li>
-                    <li><a href="#portfolio">Portfolio</a></li>
-                    <li><a href="#team">Team</a></li>
-                    <li><a href="#contact">Contact</a></li>
+                    <li><a href="/#hero" class="active">Home<br></a></li>
+                    <li><a href="/#about">About</a></li>
+                    <li><a href="/#services">Services</a></li>
+                    <li><a href="/#portfolio">Portfolio</a></li>
+                    <li><a href="/#team">Team</a></li>
+                    <li><a href="/#contact">Contact</a></li>
                     <li class="dropdown">
                         <a href="#"><span>Quick Services</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
                         <ul>
@@ -59,13 +59,8 @@
                 <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
             </nav>
             <nav id="navmenu" class="navmenu">
-                <ul>
-                    <li><a class="btn-getstarted me-4" asp-area="Identity" asp-page="/Account/Login">Log In</a></li>
-                    <li><button id="darkModeBtn" class="btn btn-outline-primary"><i class="bi bi-moon"></i></button></li>
-                    <li><button id="lightModeBtn" class="btn btn-outline-primary"><i class="bi bi-sun"></i></button></li>
-                </ul>
+                @await Html.PartialAsync("_MiniNavPartial")
             </nav>
-
         </div>
     </header>
 

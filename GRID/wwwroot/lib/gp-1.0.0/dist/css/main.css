@@ -41,9 +41,17 @@
 }
 
 /* Color Presets for light and dark mode */
-[data-bs-theme=light]  {
+[data-bs-theme=light] {
     --background-color: #f9f9f9;
     --surface-color: #ffffff;
+
+    .light-theme {
+        display: block;
+    }
+
+    .dark-theme {
+        display: none;
+    }
 }
 
 [data-bs-theme=dark] {
@@ -52,6 +60,14 @@
     --heading-color: #ffffff;
     --surface-color: #252525;
     --contrast-color: #2a2727;
+
+    .light-theme {
+        display: none;
+    }
+
+    .dark-theme {
+        display: block;
+    }
 }
 
 /* Color Presets - These classes override global colors when applied to any section or element, providing reuse of the sam color scheme. */
