@@ -19,7 +19,10 @@
         <div class="row justify-content-center text-center" data-aos="fade-up" data-aos-delay="100">
             <div class="col-xl-6 col-lg-8">
                 <h2>General Resource & Integration Dashboard<span>.</span></h2>
-                <p>Everything I build - all in one GRID</p>
+                <p>Everything I build - all in one GRID @{
+                        var env = Environment.GetEnvironmentVariable("DB_PASSWORD");
+                    }
+                    @env</p>
             </div>
         </div>
 

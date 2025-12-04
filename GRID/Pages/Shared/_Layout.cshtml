@@ -29,9 +29,9 @@
         <div class="container-fluid position-relative align-items-center justify-content-between">
 
             <div class="row">
-                <div class="col">
+                <div class="col d-flex align-items-center justify-content-center">
 
-                    <a href="/" class="logo d-flex align-items-center ps-4">
+                    <a href="/" class="logo d-flex align-items-center me-auto me-lg-0">
                         <!-- Uncomment the line below if you also wish to use an image logo -->
                         <!-- <img src="~/lib/gp-1.0.0/dist/img/logo.png" alt=""> -->
                         <h1 class="sitename">GRID</h1>
@@ -39,7 +39,7 @@
                     </a>
                 </div>
                 <div class="col">
-                    <nav id="navmenu" class="navmenu d-flex justify-content-center">
+                    <nav id="navmenu" class="navmenu d-flex justify-content-md-center justify-content-end">
                         <ul>
                             <li><a href="/#hero" class="active">Home<br></a></li>
                             <li><a href="/#about">About</a></li>
@@ -66,10 +66,8 @@
                         <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
                     </nav>
                 </div>
-                <div class="col d-flex justify-content-end">
-                    <nav id="navmenu" class="navmenu pe-4">
+                <div class="col-md d-md-flex d-none justify-content-center align-items-center">
                         @await Html.PartialAsync("_MiniNavPartial")
-                    </nav>
                 </div>
             </div>
         </div>
