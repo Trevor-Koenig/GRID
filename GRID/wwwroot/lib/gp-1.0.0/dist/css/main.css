@@ -23,6 +23,7 @@
     --default-color: #444444; /* Default color used for the majority of the text content across the entire website */
     --heading-color: #151515; /* Color for headings, subheadings and title throughout the website */
     --accent-color: #ffc451; /* Accent color that represents your brand on the website. It's used for buttons, links, and other elements that need to stand out */
+    --accent-color-light: #ffd480;
     --surface-color: #ffffff; /* The surface color is used as a background of boxed elements within sections, such as cards, icon boxes, or other elements that require a visual separation from the global background. */
     --contrast-color: #312f2f; /* Contrast color for text, ensuring readability against backgrounds of accent, heading, or default colors. */
     /* special bootstrap colors */
@@ -60,6 +61,7 @@
     --heading-color: #ffffff;
     --surface-color: #252525;
     --contrast-color: #2a2727;
+    --accent-color-light: #ffb31a;
 
     .light-theme {
         display: none;
@@ -117,24 +119,6 @@ h5,
 h6 {
   color: var(--heading-color);
   font-family: var(--heading-font);
-}
-
-.btn-primary {
-    --bs-btn-bg: var(--accent-color);
-    --bs-btn-border-color: var(--accent-color);
-    --bs-btn-disabled-bg: var(--accent-color);
-    --bs-btn-disabled-border-color: var(--accent-color);
-}
-
-.btn-outline-primary {
-    --bs-btn-color: var(--accent-color);
-    --bs-btn-border-color: var(--accent-color);
-    --bs-btn-hover-bg: var(--accent-color);
-    --bs-btn-hover-border-color: var(--accent-color);
-    --bs-btn-active-bg: var(--accent-color);
-    --bs-btn-active-border-color: var(--accent-color);
-    --bs-btn-disabled-color: var(--accent-color);
-    --bs-btn-disabled-border-color: var(--accent-color);
 }
 
 /* PHP Email Form Messages
@@ -1761,8 +1745,25 @@ section,
 }
 
 /*--------------------------------------------------------------
-# Starter Section Section
+# Custon Section
 --------------------------------------------------------------*/
-.starter-section {
-  /* Add your styles here */
+
+.btn-primary {
+    --bs-btn-bg: var(--accent-color);
+    --bs-btn-border-color: var(--accent-color);
+    --bs-btn-disabled-bg: var(--accent-color);
+    --bs-btn-disabled-border-color: var(--accent-color);
+    --bs-btn-hover-bg: var(--accent-color-light);
+    --bs-btn-hover-border-color: var(--accent-color-light);
+}
+
+.btn-outline-primary {
+    --bs-btn-color: var(--accent-color);
+    --bs-btn-border-color: var(--accent-color);
+    --bs-btn-hover-bg: var(--accent-color);
+    --bs-btn-hover-border-color: var(--accent-color);
+    --bs-btn-active-bg: var(--accent-color);
+    --bs-btn-active-border-color: var(--accent-color);
+    --bs-btn-disabled-color: var(--accent-color);
+    --bs-btn-disabled-border-color: var(--accent-color);
 }

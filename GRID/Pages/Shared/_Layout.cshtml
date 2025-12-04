@@ -20,47 +20,58 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/GRID.styles.css" asp-append-version="true" />
     <!-- GP-1.0.0 Stylsheet -->
-    <link href="~/lib/gp-1.0.0/dist/css/main.css" rel="stylesheet">
+    <link href="~/lib/gp-1.0.0/dist/css/main.css" rel="stylesheet" />
+    <!-- Cutsom Icons (WHAATTT??)-->
+    <link href="~/css/CustomIcons.css" rel="stylesheet" />
 </head>
-<body class="index-page">
+<body>
     <header id="header" class="header d-flex align-items-center fixed-top">
-        <div class="container-fluid container-xl position-relative d-flex align-items-center justify-content-between">
+        <div class="container-fluid position-relative align-items-center justify-content-between">
 
-            <a href="/" class="logo d-flex align-items-center me-auto me-lg-0">
-                <!-- Uncomment the line below if you also wish to use an image logo -->
-                <!-- <img src="~/lib/gp-1.0.0/dist/img/logo.png" alt=""> -->
-                <h1 class="sitename">GRID</h1>
-                <span>.</span>
-            </a>
+            <div class="row">
+                <div class="col">
 
-            <nav id="navmenu" class="navmenu">
-                <ul>
-                    <li><a href="/#hero" class="active">Home<br></a></li>
-                    <li><a href="/#about">About</a></li>
-                    <li><a href="/#services">Services</a></li>
-                    <li><a href="/#portfolio">Portfolio</a></li>
-                    <li><a href="/#team">Team</a></li>
-                    <li><a href="/#contact">Contact</a></li>
-                    <li class="dropdown">
-                        <a href="#"><span>Quick Services</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
+                    <a href="/" class="logo d-flex align-items-center ps-4">
+                        <!-- Uncomment the line below if you also wish to use an image logo -->
+                        <!-- <img src="~/lib/gp-1.0.0/dist/img/logo.png" alt=""> -->
+                        <h1 class="sitename">GRID</h1>
+                        <span>.</span>
+                    </a>
+                </div>
+                <div class="col">
+                    <nav id="navmenu" class="navmenu d-flex justify-content-center">
                         <ul>
-                            <li><a href="https://flix.trevorsystems.com">Jellyfin</a></li>
-                            <li><a href="https://photos.trevorsystems.com">Immich</a></li>
+                            <li><a href="/#hero" class="active">Home<br></a></li>
+                            <li><a href="/#about">About</a></li>
+                            <li><a href="/#services">Services</a></li>
+                            <li><a href="/#portfolio">Portfolio</a></li>
+                            <li><a href="/#team">Team</a></li>
+                            <li><a href="/#contact">Contact</a></li>
                             <li class="dropdown">
-                                <a href="#"><span>Admin Services</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
+                                <a href="#"><span>Quick Services</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
                                 <ul>
-                                    <li><a href="https://truenas.trevorsystems.com">TrueNAS Dashboard</a></li>
-                                    <li><a href="https://zoraxy.trevorsystems.com">Zoraxy Dashboard</a></li>
+                                    <li><a href="https://flix.trevorsystems.com">Jellyfin</a></li>
+                                    <li><a href="https://photos.trevorsystems.com">Immich</a></li>
+                                    <li><a>File Swap (WIP)</a><li>
+                                    <li class="dropdown">
+                                        <a href="#"><span>Admin Services</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
+                                        <ul>
+                                            <li><a href="https://truenas.trevorsystems.com">TrueNAS Dashboard</a></li>
+                                            <li><a href="https://zoraxy.trevorsystems.com">Zoraxy Dashboard</a></li>
+                                        </ul>
+                                    </li>
                                 </ul>
                             </li>
                         </ul>
-                    </li>
-                </ul>
-                <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
-            </nav>
-            <nav id="navmenu" class="navmenu">
-                @await Html.PartialAsync("_MiniNavPartial")
-            </nav>
+                        <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
+                    </nav>
+                </div>
+                <div class="col d-flex justify-content-end">
+                    <nav id="navmenu" class="navmenu pe-4">
+                        @await Html.PartialAsync("_MiniNavPartial")
+                    </nav>
+                </div>
+            </div>
         </div>
     </header>
 
@@ -78,7 +89,6 @@
     <div id="preloader"></div>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    @* <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script> *@
     <script src="~/js/site.js" asp-append-version="true"></script>
 
     <!-- Vendor JS Files -->
