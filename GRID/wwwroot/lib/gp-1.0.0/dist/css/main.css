@@ -62,6 +62,12 @@
     --surface-color: #252525;
     --contrast-color: #2a2727;
     --accent-color-light: #ffb31a;
+    --nav-color: rgba(255, 255, 255, 0.905); /* The default color of the main navmenu links */
+    --nav-hover-color: var(--accent-color-light); /* Applied to main navmenu links when they are hovered over or active */
+    --nav-mobile-background-color: #000000; /* Used as the background color for mobile navigation menu */
+    --nav-dropdown-background-color: #000000; /* Used as the background color for dropdown items that appear when hovering over primary navigation items */
+    --nav-dropdown-color: #ffffff; /* Used for navigation links of the dropdown items in the navigation menu. */
+    --nav-dropdown-hover-color: var(--accent-color-light); /* Similar to --nav-hover-color, this color is applied to dropdown navigation links when they are hovered over. */
 
     .light-theme {
         display: none;
@@ -424,12 +430,6 @@ h6 {
     justify-content: center;
     border-radius: 50%;
     transition: 0.3s;
-    background-color: color-mix(in srgb, var(--accent-color), white 90%);
-  }
-
-  .navmenu a i:hover,
-  .navmenu a:focus i:hover {
-    background-color: color-mix(in srgb, var(--accent-color), white 90%);
   }
 
   .navmenu a:hover,

@@ -39,7 +39,7 @@
                     </a>
                 </div>
                 <div class="col">
-                    <nav id="navmenu" class="navmenu d-flex justify-content-md-center justify-content-end">
+                    <nav id="navmenu" class="navmenu d-flex justify-content-xl-center justify-content-end">
                         <ul>
                             <li><a href="/#hero" class="active">Home<br></a></li>
                             <li><a href="/#about">About</a></li>
@@ -62,11 +62,21 @@
                                     </li>
                                 </ul>
                             </li>
+                            <li class="d-xl-none my-4"><a></a></li>
+                            <li class="d-xl-none">
+                                <a asp-area="Identity" asp-page="/Account/Login">Log In</a>
+                                </li>
+                            <li class="d-xl-none">
+                                <a id="darkModeBtn">Dark Mode</a>
+                            </li>
+                            <li class="d-xl-none">
+                                <a id="lightModeBtn">Light Mode</a>
+                            </li>
                         </ul>
                         <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
                     </nav>
                 </div>
-                <div class="col-md d-md-flex d-none justify-content-center align-items-center">
+                <div class="col-lg d-xl-flex d-none justify-content-center align-items-center">
                         @await Html.PartialAsync("_MiniNavPartial")
                 </div>
             </div>
