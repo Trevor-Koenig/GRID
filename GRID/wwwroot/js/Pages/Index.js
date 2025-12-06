@@ -4,16 +4,25 @@
 });
 
 document.addEventListener('click', function (event) {
-    // Find the closest ancestor (or itself) with class "div-link"
-    const linkDiv = event.target.closest('.div-link');
+    const divLink = event.target.closest(".div-link");
+    if (!divLink) return;
 
-    // If none found, do nothing
-    if (!linkDiv) return;
+    const href = divLink.dataset.href;
+    if (!href) return;
 
-    // Get data-href (or whatever attribute you use)
-    const targetUrl = linkDiv.getAttribute('data-href');
-    if (!targetUrl) return;
+    // Create a temporary anchor element
+    const a = document.createElement("a");
+    a.href = href;
 
-    // Redirect
-    window.location.href = targetUrl;
+    // Copy modifier keys so the browser knows how to open the link
+    const clickEvent = new MouseEvent("click", {
+        view: window,
+        bubbles: true,
+        cancelable: true,
+        ctrlKey: event.ctrlKey,
+        metaKey: event.metaKey,
+        button: event.button
+    });
+
+    a.dispatchEvent(clickEvent);
 });
