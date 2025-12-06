@@ -36,6 +36,7 @@
 
   <ItemGroup>
     <Folder Include="wwwroot\images\icons\" />
+    <Folder Include="wwwroot\images\favicon\" />
     <Folder Include="wwwroot\lib\gp-1.0.0\" />
   </ItemGroup>
 
