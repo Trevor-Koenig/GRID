@@ -1,16 +1,16 @@
 services:
 
   db:
-      image: postgres:latest
-      container_name: db
-      environment:
-        - POSTGRES_USER=${POSTGRES_USER}
-        - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-        - POSTGRES_DB=grid
-      ports:
-        - 5432:5433
-  
-      restart: always
+    image: postgres:latest
+    container_name: db
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=grid
+    ports:
+      - 5432:5432
+    
+    restart: always
 
   grid:
     image: ${DOCKER_REGISTRY-}grid
