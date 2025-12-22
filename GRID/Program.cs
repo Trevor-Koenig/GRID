@@ -1,5 +1,7 @@
 using GRID.Data;
+using GRID.Services;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,9 +13,29 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+builder.Services.AddDefaultIdentity<IdentityUser>(options =>
+{
+    options.SignIn.RequireConfirmedAccount = true;
+    options.User.RequireUniqueEmail = true;
+})
     .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddRazorPages();
+
+// Custom services for the app
+var apiKey = builder.Configuration["Mailgun:ApiKey"];
+if (string.IsNullOrWhiteSpace(apiKey))
+{
+    throw new InvalidOperationException("Mailgun API key not configured! Check Docker environment variables.");
+}
+builder.Services.AddHttpClient();
+if (builder.Environment.IsDevelopment() && false)
+{
+    builder.Services.AddTransient<IEmailSender, DevEmailSender>();
+}
+else
+{
+    builder.Services.AddTransient<IEmailSender, MailgunApiEmailSender>();
+}
 
 var app = builder.Build();
 

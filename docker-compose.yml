@@ -17,6 +17,7 @@ services:
     container_name: grid
     environment:
       - ConnectionStrings__DefaultConnection=${CONNECTION_STRING}
+      - Mailgun__ApiKey=${MAILGUN_API_KEY}
     build:
       context: .
       dockerfile: GRID/Dockerfile
