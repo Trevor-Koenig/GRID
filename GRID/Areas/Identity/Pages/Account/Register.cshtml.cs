@@ -2,14 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 #nullable disable
 
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Text.Encodings.Web;
-using System.Threading;
-using System.Threading.Tasks;
+using GRID.Models;
+using GRID.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -18,6 +12,14 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Text;
+using System.Text.Encodings.Web;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace GRID.Areas.Identity.Pages.Account
 {
@@ -28,6 +30,8 @@ namespace GRID.Areas.Identity.Pages.Account
         private readonly IUserStore<IdentityUser> _userStore;
         private readonly IUserEmailStore<IdentityUser> _emailStore;
         private readonly ILogger<RegisterModel> _logger;
+        private readonly InviteService _inviteService;
+        private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IEmailSender _emailSender;
 
         public RegisterModel(
@@ -35,6 +39,8 @@ namespace GRID.Areas.Identity.Pages.Account
             IUserStore<IdentityUser> userStore,
             SignInManager<IdentityUser> signInManager,
             ILogger<RegisterModel> logger,
+            InviteService inviteService,
+            RoleManager<IdentityRole> roleManager,
             IEmailSender emailSender)
         {
             _userManager = userManager;
@@ -42,6 +48,8 @@ namespace GRID.Areas.Identity.Pages.Account
             _emailStore = GetEmailStore();
             _signInManager = signInManager;
             _logger = logger;
+            _inviteService = inviteService;
+            _roleManager = roleManager;
             _emailSender = emailSender;
         }
 
@@ -50,7 +58,7 @@ namespace GRID.Areas.Identity.Pages.Account
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
         [BindProperty]
-        public InputModel Input { get; set; }
+        public InputModel Input { get; set; } = new();
 
         /// <summary>
         ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
@@ -63,6 +71,10 @@ namespace GRID.Areas.Identity.Pages.Account
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
         public IList<AuthenticationScheme> ExternalLogins { get; set; }
+
+        // Records whether or not the link had an invite code when it started so that we do not make input read-only on incorrect code submit
+        [BindProperty]
+        public bool InviteFromLink { get; set; }
 
         /// <summary>
         ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
@@ -97,12 +109,22 @@ namespace GRID.Areas.Identity.Pages.Account
             [Display(Name = "Confirm password")]
             [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
             public string ConfirmPassword { get; set; }
+
+
+            [Required(ErrorMessage = "You must have an invite code to Register")]
+            [Display(Name = "Invite code")]
+            public string InviteCode { get; set; }
         }
 
 
-        public async Task OnGetAsync(string returnUrl = null)
+        public async Task OnGetAsync(string returnUrl = null, string? inviteCode = null)
         {
             ReturnUrl = returnUrl;
+            if (!string.IsNullOrWhiteSpace(inviteCode))
+            {
+                InviteFromLink = true;
+                Input.InviteCode = inviteCode;
+            }
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
         }
 
@@ -112,10 +134,73 @@ namespace GRID.Areas.Identity.Pages.Account
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
             if (ModelState.IsValid)
             {
-                var user = CreateUser();
 
+                /******************
+                 * 
+                 * Custom Invite code validation logic
+                 * 
+                 ******************/
+                var (isValid, invite) = await _inviteService.ValidateInviteAsync(Input.InviteCode);
+                if (!string.IsNullOrEmpty(Input.InviteCode))
+                {
+                    if (isValid != 0 && invite != null)
+                    {
+                        switch (isValid)
+                        {
+                            case 1:
+                                ModelState.AddModelError("Input.InviteCode", "Invite code does not exist.");
+                                break;
+                            case 2:
+                                ModelState.AddModelError("Input.InviteCode", "Invite code expired.");
+                                break;
+                            case 3:
+                                ModelState.AddModelError("Input.InviteCode", "Invite code has already been used.");
+                                break;
+                            case 4:
+                                ModelState.AddModelError("Input.InviteCode", "Invite code has reached max uses.");
+                                break;
+                            default:
+                                if (invite == null)
+                                {
+                                    ModelState.AddModelError("Input.InviteCode", "Invite does not exist.");
+                                }
+                                else
+                                {
+                                    ModelState.AddModelError("Input.InviteCode", "Invalid or expired invite code.");
+                                }
+                                break;
+                        }
+                        return Page();
+                    }
+                }
+
+                // end invite code validation logic
+
+                var user = CreateUser();
+                // mark invite code as used by this user
+                var consumeResult = await _inviteService.ConsumeInviteAsync(Input.InviteCode, user.Id);
+                // check that it consumed alright
+                if (!consumeResult.Success)
+                {
+                    // remove created user if the invite code was unable to be consumed
+                    await _userManager.DeleteAsync(user);
+
+                    ModelState.AddModelError(
+                        string.Empty,
+                        "Invite code could not be consumed. Please try again.");
+
+                    return Page();
+                }
+
+                // fuck there are so many await asyncs damn
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
+                // if the invite code used specifies a role to add the user to (and it exists) do that
+                if (!string.IsNullOrEmpty(invite.Role) &&
+                    await _roleManager.RoleExistsAsync(invite.Role))
+                {
+                    await _userManager.AddToRoleAsync(user, invite.Role);
+                }
                 var result = await _userManager.CreateAsync(user, Input.Password);
 
                 if (result.Succeeded)

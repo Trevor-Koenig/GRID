@@ -6,16 +6,10 @@
     using System.Net.Http.Headers;
     using System.Text;
 
-    public class MailgunApiEmailSender : IEmailSender
+    public class MailgunApiEmailSender(HttpClient httpClient, IConfiguration config) : IEmailSender
     {
-        private readonly HttpClient _httpClient;
-        private readonly IConfiguration _config;
-
-        public MailgunApiEmailSender(HttpClient httpClient, IConfiguration config)
-        {
-            _httpClient = httpClient;
-            _config = config;
-        }
+        private readonly HttpClient _httpClient = httpClient;
+        private readonly IConfiguration _config = config;
 
         public async Task SendEmailAsync(string email, string subject, string htmlMessage)
         {

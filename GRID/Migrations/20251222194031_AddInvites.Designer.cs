@@ -3,6 +3,7 @@ using System;
 using GRID.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace GRID.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251222194031_AddInvites")]
+    partial class AddInvites
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -52,23 +55,15 @@ namespace GRID.Migrations
                     b.Property<bool>("IsSingleUse")
                         .HasColumnType("boolean");
 
-                    b.Property<int?>("MaxUses")
+                    b.Property<int>("MaxUses")
                         .HasColumnType("integer");
 
                     b.Property<string>("Role")
                         .HasColumnType("text");
 
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("bytea");
-
                     b.HasKey("Id");
 
-                    b.ToTable("Invites", t =>
-                        {
-                            t.HasCheckConstraint("CK_Invites_Uses", "\"MaxUses\" IS NULL OR \"CurrentUses\" <= \"MaxUses\"");
-                        });
+                    b.ToTable("Invites");
                 });
 
             modelBuilder.Entity("GRID.Models.InviteUsage", b =>

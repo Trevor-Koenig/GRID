@@ -1,0 +1,75 @@
+﻿@page
+@model GRID.Pages.Admin.Invites.EditModel
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h1>Edit</h1>
+
+<h4>Invite</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Invite.Id" />
+            <div class="form-group">
+                <label asp-for="Invite.Code" class="control-label"></label>
+                <input asp-for="Invite.Code" class="form-control" />
+                <span asp-validation-for="Invite.Code" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Invite.Role" class="control-label"></label>
+                <input asp-for="Invite.Role" class="form-control" />
+                <span asp-validation-for="Invite.Role" class="text-danger"></span>
+            </div>
+            <div class="form-group form-check">
+                <label class="form-check-label">
+                    <input class="form-check-input" asp-for="Invite.IsSingleUse" /> @Html.DisplayNameFor(model => model.Invite.IsSingleUse)
+                </label>
+            </div>
+            <div class="form-group">
+                <label asp-for="Invite.MaxUses" class="control-label"></label>
+                <input asp-for="Invite.MaxUses" class="form-control" />
+                <span asp-validation-for="Invite.MaxUses" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Invite.CurrentUses" class="control-label"></label>
+                <input asp-for="Invite.CurrentUses" class="form-control" />
+                <span asp-validation-for="Invite.CurrentUses" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Invite.Email" class="control-label"></label>
+                <input asp-for="Invite.Email" class="form-control" />
+                <span asp-validation-for="Invite.Email" class="text-danger"></span>
+            </div>
+            <div class="form-group form-check">
+                <label class="form-check-label">
+                    <input class="form-check-input" asp-for="Invite.IsActive" /> @Html.DisplayNameFor(model => model.Invite.IsActive)
+                </label>
+            </div>
+            <div class="form-group">
+                <label asp-for="Invite.CreatedAt" class="control-label"></label>
+                <input asp-for="Invite.CreatedAt" class="form-control" />
+                <span asp-validation-for="Invite.CreatedAt" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Invite.ExpiresAt" class="control-label"></label>
+                <input asp-for="Invite.ExpiresAt" class="form-control" />
+                <span asp-validation-for="Invite.ExpiresAt" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-page="./Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

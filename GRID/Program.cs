@@ -2,11 +2,17 @@ using GRID.Data;
 using GRID.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+/***********************************
+ * 
+ * DEFAULT/PRE-BUILT SERVICES
+ * 
+ **********************************/
 builder.Configuration.AddEnvironmentVariables();
 var connectionString = builder.Configuration["ConnectionStrings:DefaultConnection"] ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -18,17 +24,23 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options =>
     options.SignIn.RequireConfirmedAccount = true;
     options.User.RequireUniqueEmail = true;
 })
+    .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddRazorPages();
 
-// Custom services for the app
+/***********************************
+ * 
+ * CUSTOM SERVICES
+ * 
+ **********************************/
+// email service (through Mailgun)
 var apiKey = builder.Configuration["Mailgun:ApiKey"];
 if (string.IsNullOrWhiteSpace(apiKey))
 {
     throw new InvalidOperationException("Mailgun API key not configured! Check Docker environment variables.");
 }
 builder.Services.AddHttpClient();
-if (builder.Environment.IsDevelopment() && false)
+if (builder.Environment.IsDevelopment())
 {
     builder.Services.AddTransient<IEmailSender, DevEmailSender>();
 }
@@ -37,6 +49,33 @@ else
     builder.Services.AddTransient<IEmailSender, MailgunApiEmailSender>();
 }
 
+// invite code service
+builder.Services.AddScoped<InviteService>();
+
+
+/***********************************
+ * 
+ * RATE LIMITING
+ * 
+ ***********************************/
+
+builder.Services.AddRateLimiter(options =>
+{
+    options.AddFixedWindowLimiter("InviteLimiter", opt =>
+    {
+        opt.PermitLimit = 10;             // max 10 requests
+        opt.Window = TimeSpan.FromMinutes(1);  // per minute
+        opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        opt.QueueLimit = 2;               // invoke small queue so that they can not have too many concurrent attempts
+    });
+});
+
+
+/***********************************
+ * 
+ * BUILD APP
+ * 
+ **********************************/
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

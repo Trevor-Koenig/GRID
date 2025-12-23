@@ -14,6 +14,18 @@
                 <hr />
                 <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
                 <div class="form-floating mb-3">
+                    @if (Model.InviteFromLink)
+                    {
+                        <input asp-for="Input.InviteCode" class="form-control" aria-required="true" readonly />
+                    }
+                    else
+                    {
+                        <input asp-for="Input.InviteCode" class="form-control" aria-required="true" placeholder="XXXXXXXX" />
+                    }
+                    <label asp-for="Input.InviteCode">Invite Code</label>
+                    <span asp-validation-for="Input.InviteCode" class="text-danger"></span>
+                </div>
+                <div class="form-floating mb-3">
                     <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
                     <label asp-for="Input.Email">Email</label>
                     <span asp-validation-for="Input.Email" class="text-danger"></span>
