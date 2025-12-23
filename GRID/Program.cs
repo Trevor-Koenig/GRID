@@ -100,14 +100,13 @@ app.MapStaticAssets();
 app.MapRazorPages()
    .WithStaticAssets();
 
-// used to apply migrations, does this reset the database each time?
 // Apply migrations at startup
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     try
     {
-        var context = services.GetRequiredService<ApplicationDbContext>(); // Replace YourDbContext
+        var context = services.GetRequiredService<ApplicationDbContext>();
         context.Database.Migrate();
     }
     catch (Exception ex)
