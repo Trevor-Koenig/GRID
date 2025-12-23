@@ -143,7 +143,7 @@ namespace GRID.Areas.Identity.Pages.Account
                 var (isValid, invite) = await _inviteService.ValidateInviteAsync(Input.InviteCode);
                 if (!string.IsNullOrEmpty(Input.InviteCode))
                 {
-                    if (isValid != 0 && invite != null)
+                    if (isValid != 0 || invite == null)
                     {
                         switch (isValid)
                         {
