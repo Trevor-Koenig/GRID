@@ -3,50 +3,114 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - GRID</title>
+    <title>GRID - @ViewData["Title"]</title>
     <script type="importmap"></script>
+    <!-- Favicons -->
+    <link href="~/images/favicon/favicon-32x32.png" rel="icon">
+    <link href="~/images/favicon/apple-touch-icon.png" rel="apple-touch-icon">
+    <!-- Vendor CSS Files -->
+    <link href="~/lib/gp-1.0.0/dist/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="~/lib/gp-1.0.0/dist/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+    <link href="~/lib/gp-1.0.0/dist/vendor/aos/aos.css" rel="stylesheet">
+    <link href="~/lib/gp-1.0.0/dist/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
+    <link href="~/lib/gp-1.0.0/dist/vendor/glightbox/css/glightbox.min.css" rel="stylesheet">
+    <!-- Bootstrap default stlyes -->
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <!-- Custom stylesheets -->
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/GRID.styles.css" asp-append-version="true" />
+    <!-- GP-1.0.0 Stylsheet -->
+    <link href="~/lib/gp-1.0.0/dist/css/main.css" rel="stylesheet" />
+    <!-- Cutsom Icons (WHAATTT??)-->
+    <link href="~/css/CustomIcons.css" rel="stylesheet" />
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container">
-                <a class="navbar-brand" asp-area="" asp-page="/Index">GRID</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Privacy">Privacy</a>
-                        </li>
-                    </ul>
-                    <partial name="_LoginPartial" />
+    <header id="header" class="header d-flex align-items-center fixed-top">
+        <div class="container-fluid position-relative align-items-center justify-content-between">
+
+            <div class="row">
+                <div class="col d-flex align-items-center justify-content-center">
+
+                    <a href="/" class="logo d-flex align-items-center me-auto me-lg-0">
+                        <!-- Uncomment the line below if you also wish to use an image logo -->
+                        <!-- <img src="~/lib/gp-1.0.0/dist/img/logo.png" alt=""> -->
+                        <h1 class="sitename">GRID</h1>
+                        <span>.</span>
+                    </a>
+                </div>
+                <div class="col">
+                    <nav id="navmenu" class="navmenu d-flex justify-content-xl-center justify-content-end">
+                        <ul>
+                            <li><a href="/#home" class="active">Home<br></a></li>
+                            <li><a href="/#about">About</a></li>
+                            <li><a href="/#services">Services</a></li>
+                            <li><a href="/#portfolio">Portfolio</a></li>
+                            <li><a href="/#team">Team</a></li>
+                            <li><a href="/#contact">Contact</a></li>
+                            <li class="dropdown">
+                                <a href="#"><span>Quick Services</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
+                                <ul>
+                                    <li><a href="https://flix.trevorsystems.com">Jellyfin</a></li>
+                                    <li><a href="https://photos.trevorsystems.com">Immich</a></li>
+                                    <li><a>File Swap (WIP)</a><li>
+                                    <li class="dropdown">
+                                        <a href="#"><span>Admin Services</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
+                                        <ul>
+                                            <li><a href="https://truenas.trevorsystems.com">TrueNAS Dashboard</a></li>
+                                            <li><a href="https://zoraxy.trevorsystems.com">Zoraxy Dashboard</a></li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="d-xl-none my-4"><a></a></li>
+                            <li class="d-xl-none">
+                                <a asp-area="Identity" asp-page="/Account/Login">Log In</a>
+                                </li>
+                            <li class="d-xl-none">
+                                <a class="theme-dark-btn light-theme">Dark Mode</a>
+                            </li>
+                            <li class="d-xl-none">
+                                <a class="theme-light-btn dark-theme">Light Mode</a>
+                            </li>
+                        </ul>
+                        <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
+                    </nav>
+                </div>
+                <div class="col-lg d-xl-flex d-none justify-content-center align-items-center">
+                        @await Html.PartialAsync("_MiniNavPartial")
                 </div>
             </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
-
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2025 - GRID - <a asp-area="" asp-page="/Privacy">Privacy</a>
         </div>
+    </header>
+
+    <main class="main">
+        @RenderBody()
+    </main>
+
+    <footer id="footer" class="footer dark-background">
     </footer>
 
+    <!-- Scroll Top -->
+    <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+    <!-- Preloader -->
+    <div id="preloader"></div>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <!-- Vendor JS Files -->
+    <script src="~/lib/gp-1.0.0/dist/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="~/lib/gp-1.0.0/dist/vendor/php-email-form/validate.js"></script>
+    <script src="~/lib/gp-1.0.0/dist/vendor/aos/aos.js"></script>
+    <script src="~/lib/gp-1.0.0/dist/vendor/swiper/swiper-bundle.min.js"></script>
+    <script src="~/lib/gp-1.0.0/dist/vendor/glightbox/js/glightbox.min.js"></script>
+    <script src="~/lib/gp-1.0.0/dist/vendor/imagesloaded/imagesloaded.pkgd.min.js"></script>
+    <script src="~/lib/gp-1.0.0/dist/vendor/isotope-layout/isotope.pkgd.min.js"></script>
+    <script src="~/lib/gp-1.0.0/dist/vendor/purecounter/purecounter_vanilla.js"></script>
+
+    <!-- Main JS File -->
+    <script src="~/lib/gp-1.0.0/dist/js/main.js"></script>
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>

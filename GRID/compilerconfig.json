@@ -1,0 +1,14 @@
+﻿[
+  {
+    "outputFile": "wwwroot/lib/quartz/dist/css/_variables.css",
+    "inputFile": "wwwroot/lib/quartz/dist/css/_variables.scss"
+  },
+  {
+    "outputFile": "wwwroot/lib/quartz/dist/css/_bootswatch.css",
+    "inputFile": "wwwroot/lib/quartz/dist/css/_bootswatch.scss"
+  },
+  {
+    "outputFile": "wwwroot/lib/quartz/scss/bootstrap.css",
+    "inputFile": "wwwroot/lib/quartz/scss/bootstrap.scss"
+  }
+]

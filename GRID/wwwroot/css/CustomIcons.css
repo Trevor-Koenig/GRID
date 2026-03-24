@@ -1,0 +1,11 @@
+﻿.ci {
+    display: inline-block;
+    width: 24px; /* Adjust size as needed */
+    height: 24px;
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
+.ci-jellyfin {
+    background-image: url('/images/icons/jellyfin.svg');
+}
