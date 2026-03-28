@@ -53,13 +53,18 @@
                                     <li><a href="https://flix.trevorsystems.com">Jellyfin</a></li>
                                     <li><a href="https://photos.trevorsystems.com">Immich</a></li>
                                     <li><a>File Swap (WIP)</a><li>
+                                    @if (User.IsInRole("Admin"))
+                                    {
                                     <li class="dropdown">
                                         <a href="#"><span>Admin Services</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
                                         <ul>
                                             <li><a href="https://truenas.trevorsystems.com">TrueNAS Dashboard</a></li>
                                             <li><a href="https://zoraxy.trevorsystems.com">Zoraxy Dashboard</a></li>
+                                            <li><a asp-page="/Admin/Users/Index">Users</a></li>
+                                            <li><a asp-page="/Admin/Roles/Index">Roles</a></li>
                                         </ul>
                                     </li>
+                                    }
                                 </ul>
                             </li>
                             <li class="d-xl-none my-4"><a></a></li>

@@ -1,0 +1,65 @@
+@page
+@model GRID.Pages.Admin.Users.DetailsModel
+
+@{
+    ViewData["Title"] = "User Details";
+}
+
+<section class="section">
+    <div class="container section-title" data-aos="fade-up">
+        <h2>User Details</h2>
+        <p>@Model.Email</p>
+    </div>
+
+    <div class="container" data-aos="fade-up" data-aos-delay="100">
+        <div class="row justify-content-center">
+            <div class="col-lg-6">
+                <div class="admin-panel-card">
+                    <div class="admin-panel-header">
+                        <span><i class="bi bi-person-circle me-2"></i>Account Info</span>
+                    </div>
+                    <div class="admin-detail-body">
+                        <div class="admin-detail-row">
+                            <span class="admin-detail-label">Email</span>
+                            <span class="admin-detail-value">@Model.Email</span>
+                        </div>
+                        <div class="admin-detail-row">
+                            <span class="admin-detail-label">Email Confirmed</span>
+                            <span class="admin-detail-value">
+                                @if (Model.EmailConfirmed)
+                                {
+                                    <i class="bi bi-check-circle-fill text-success me-1"></i><span class="text-success">Yes</span>
+                                }
+                                else
+                                {
+                                    <i class="bi bi-clock text-warning me-1"></i><span class="text-warning">Pending</span>
+                                }
+                            </span>
+                        </div>
+                        <div class="admin-detail-row">
+                            <span class="admin-detail-label">Roles</span>
+                            <span class="admin-detail-value">
+                                @if (Model.Roles.Any())
+                                {
+                                    foreach (var role in Model.Roles)
+                                    {
+                                        <span class="admin-role-badge admin-role-badge--@role.ToLower()">@role</span>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="text-muted fst-italic">None assigned</span>
+                                }
+                            </span>
+                        </div>
+                    </div>
+                    <div class="admin-panel-footer">
+                        <a asp-page="./Index" class="admin-back-link">
+                            <i class="bi bi-arrow-left me-1"></i>Back to Users
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

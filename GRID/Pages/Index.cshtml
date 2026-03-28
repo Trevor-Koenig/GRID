@@ -2,6 +2,8 @@
 @model IndexModel
 @{
     ViewData["Title"] = "Home page";
+    bool isAuthenticated = User.Identity?.IsAuthenticated == true;
+    string loginUrl = "/Identity/Account/Login";
 }
 
 @section Scripts {
@@ -30,13 +32,13 @@
                     <h3>Flie Swap (Coming Soon)</h3>
                 </div>
             </div>
-            <div class="col-xl-2 col-md-4 col-6 div-link" data-aos="fade-up" data-aos-delay="300" data-href="https://photos.trevorsystems.com">
+            <div class="col-xl-2 col-md-4 col-6 div-link" data-aos="fade-up" data-aos-delay="300" data-href="@(isAuthenticated ? "https://photos.trevorsystems.com" : loginUrl)">
                 <div class="icon-box">
                     <i class="bi bi-camera"></i>
                     <h3>Immich</h3>
                 </div>
             </div>
-            <div class="col-xl-2 col-md-4 col-6 div-link" data-aos="fade-up" data-aos-delay="300" data-href="https://flix.trevorsystems.com">
+            <div class="col-xl-2 col-md-4 col-6 div-link" data-aos="fade-up" data-aos-delay="300" data-href="@(isAuthenticated ? "https://flix.trevorsystems.com" : loginUrl)">
                 <div class="icon-box">
                     <i class="bi bi-film"></i>
                     <h3>Jellyfin</h3>
@@ -223,7 +225,7 @@
                     <div class="icon">
                         <i class="bi bi-easel"></i>
                     </div>
-                    <a href="https://flix.trevorsystems.com" target="_blank" class="stretched-link">
+                    <a href="@(isAuthenticated ? "https://flix.trevorsystems.com" : loginUrl)" target="_blank" class="stretched-link">
                         <h3>Jellyfin</h3>
                     </a>
                     <p>Stream and watch any movies, shows, or audiobooks that you want. No extra fees or corporate bullshit.</p>
@@ -235,7 +237,7 @@
                     <div class="icon">
                         <i class="bi bi-phone"></i>
                     </div>
-                    <a href="https://photos.trevorsystems.com" target="_blank" class="stretched-link">
+                    <a href="@(isAuthenticated ? "https://photos.trevorsystems.com" : loginUrl)" target="_blank" class="stretched-link">
                         <h3>Immich</h3>
                     </a>
                     <p>Backup your images all to one secure place with unlimited storage, no more paying for more than 15 GB.</p>
@@ -259,7 +261,7 @@
                     <div class="icon">
                         <i class="bi bi-cookie"></i>
                     </div>
-                    <a href="https://food.trevorsystems.com" target="_blank" class="stretched-link">
+                    <a href="@(isAuthenticated ? "https://food.trevorsystems.com" : loginUrl)" target="_blank" class="stretched-link">
                         <h3>Recipe Storage</h3>
                     </a>
                     <p>Store, manage, and browse an entire library of recipes. Never worry about losing your family recipes ever again.</p>

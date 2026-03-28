@@ -6,6 +6,22 @@
 
     public class InviteService(ApplicationDbContext db)
     {
+        public async Task<Invite> CreateInviteAsync(string? role, bool isSingleUse, int? maxUses, string? email, DateTime? expiresAt)
+        {
+            var invite = new Invite
+            {
+                Code = GenerateRandomCode(16),
+                Role = role,
+                IsSingleUse = isSingleUse,
+                MaxUses = isSingleUse ? 1 : maxUses,
+                Email = email,
+                ExpiresAt = expiresAt?.ToUniversalTime()
+            };
+            db.Invites.Add(invite);
+            await db.SaveChangesAsync();
+            return invite;
+        }
+
         public async Task<Invite> CreateInviteAsync(string role, bool isSingleUse = true, int maxUses = 1, string? email = null, TimeSpan? validFor = null)
         {
             var invite = new Invite
@@ -26,6 +42,24 @@
         {
             const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
             return new string(Enumerable.Range(0, length).Select(_ => chars[Random.Shared.Next(chars.Length)]).ToArray());
+        }
+
+        /// <summary>
+        /// Development only: creates a single-use invite record for <paramref name="code"/> if one doesn't already exist.
+        /// </summary>
+        public async Task EnsureDevInviteAsync(string code)
+        {
+            var exists = await db.Invites.AnyAsync(i => i.Code == code);
+            if (!exists)
+            {
+                db.Invites.Add(new Invite
+                {
+                    Code = code,
+                    IsSingleUse = true,
+                    MaxUses = 1
+                });
+                await db.SaveChangesAsync();
+            }
         }
 
         public async Task<(int IsValid, Invite? Invite)> ValidateInviteAsync(string code)
