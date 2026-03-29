@@ -43,6 +43,7 @@
                                         <th>Role</th>
                                         <th>Uses</th>
                                         <th>Email</th>
+                                        <th>Redeemed By</th>
                                         <th>Active</th>
                                         <th>Expires</th>
                                         <th></th>
@@ -78,6 +79,16 @@
                                             <td class="align-middle text-muted" style="font-size:0.875rem;">
                                                 @(string.IsNullOrEmpty(item.Email) ? "—" : item.Email)
                                             </td>
+                                            <td class="align-middle text-muted" style="font-size:0.8rem;">
+                                                @if (Model.RedeemerEmails.TryGetValue(item.Id, out var redeemers) && redeemers.Any())
+                                                {
+                                                    @string.Join(", ", redeemers)
+                                                }
+                                                else
+                                                {
+                                                    <span>—</span>
+                                                }
+                                            </td>
                                             <td class="align-middle">
                                                 @if (item.IsActive)
                                                 {
@@ -88,8 +99,31 @@
                                                     <i class="bi bi-x-circle-fill text-danger"></i>
                                                 }
                                             </td>
-                                            <td class="align-middle text-muted" style="font-size:0.875rem;">
-                                                @(item.ExpiresAt.HasValue ? item.ExpiresAt.Value.ToLocalTime().ToString("MMM d, yyyy") : "Never")
+                                            <td class="align-middle" style="font-size:0.875rem;">
+                                                @if (item.ExpiresAt.HasValue)
+                                                {
+                                                    var daysLeft = (item.ExpiresAt.Value - DateTime.UtcNow).TotalDays;
+                                                    if (daysLeft <= 3)
+                                                    {
+                                                        <span class="text-danger fw-semibold" title="Expiring soon!">
+                                                            <i class="bi bi-exclamation-triangle-fill me-1"></i>@item.ExpiresAt.Value.ToLocalTime().ToString("MMM d, yyyy")
+                                                        </span>
+                                                    }
+                                                    else if (daysLeft <= 7)
+                                                    {
+                                                        <span class="text-warning fw-semibold" title="Expiring this week">
+                                                            @item.ExpiresAt.Value.ToLocalTime().ToString("MMM d, yyyy")
+                                                        </span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="text-muted">@item.ExpiresAt.Value.ToLocalTime().ToString("MMM d, yyyy")</span>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">Never</span>
+                                                }
                                             </td>
                                             <td class="align-middle text-end">
                                                 <a asp-page="./Details" asp-route-id="@item.Id" class="admin-action-link">

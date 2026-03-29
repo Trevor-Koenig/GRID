@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 #nullable disable
 
+using GRID.Data;
 using GRID.Models;
 using GRID.Services;
 using Microsoft.AspNetCore.Authentication;
@@ -34,6 +35,7 @@ namespace GRID.Areas.Identity.Pages.Account
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IEmailSender _emailSender;
         private readonly IWebHostEnvironment _env;
+        private readonly ApplicationDbContext _db;
 
         public RegisterModel(
             UserManager<IdentityUser> userManager,
@@ -43,7 +45,8 @@ namespace GRID.Areas.Identity.Pages.Account
             InviteService inviteService,
             RoleManager<IdentityRole> roleManager,
             IEmailSender emailSender,
-            IWebHostEnvironment env)
+            IWebHostEnvironment env,
+            ApplicationDbContext db)
         {
             _userManager = userManager;
             _userStore = userStore;
@@ -54,6 +57,7 @@ namespace GRID.Areas.Identity.Pages.Account
             _roleManager = roleManager;
             _emailSender = emailSender;
             _env = env;
+            _db = db;
         }
 
         /// <summary>
@@ -224,6 +228,14 @@ namespace GRID.Areas.Identity.Pages.Account
                             : "User";
                     }
                     await _userManager.AddToRoleAsync(user, roleToAssign);
+
+                    // Create user profile
+                    _db.UserProfiles.Add(new UserProfile
+                    {
+                        UserId = user.Id,
+                        CreatedAt = DateTime.UtcNow
+                    });
+                    await _db.SaveChangesAsync();
 
                     var userId = await _userManager.GetUserIdAsync(user);
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);

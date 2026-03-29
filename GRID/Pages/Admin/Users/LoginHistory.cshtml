@@ -1,0 +1,77 @@
+@page "{id}"
+@model GRID.Pages.Admin.Users.LoginHistoryModel
+
+@{
+    ViewData["Title"] = "Login History";
+}
+
+<section class="section">
+    <div class="container section-title" data-aos="fade-up">
+        <h2>Login History</h2>
+        <p>@Model.UserEmail</p>
+    </div>
+
+    <div class="container" data-aos="fade-up" data-aos-delay="100">
+        <div class="row justify-content-center">
+            <div class="col-lg-9">
+                <div class="admin-panel-card">
+                    <div class="admin-panel-header">
+                        <span><i class="bi bi-clock-history me-2"></i>Recent logins</span>
+                        <span class="admin-panel-count">@Model.History.Count entries</span>
+                    </div>
+
+                    @if (!Model.History.Any())
+                    {
+                        <div class="admin-panel-empty">
+                            <i class="bi bi-clock"></i>
+                            <p>No login history for this user.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table admin-table">
+                                <thead>
+                                    <tr>
+                                        <th>Time</th>
+                                        <th>Result</th>
+                                        <th>IP Address</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var entry in Model.History)
+                                    {
+                                        <tr>
+                                            <td class="align-middle text-muted" style="font-size:0.875rem;">
+                                                @entry.Timestamp.ToLocalTime().ToString("MMM d, yyyy h:mm tt")
+                                            </td>
+                                            <td class="align-middle">
+                                                @if (entry.Succeeded)
+                                                {
+                                                    <span class="admin-role-badge admin-role-badge--user">Success</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="admin-role-badge admin-role-badge--inactive">Failed</span>
+                                                }
+                                            </td>
+                                            <td class="align-middle text-muted" style="font-size:0.875rem;">
+                                                @(entry.IpAddress ?? "—")
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+
+                <div class="mt-3">
+                    <a asp-page="./Index" class="admin-back-link">
+                        <i class="bi bi-arrow-left me-1"></i>Back to Users
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

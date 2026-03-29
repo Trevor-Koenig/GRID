@@ -8,6 +8,11 @@ namespace GRID.Data
     {
         public DbSet<Invite> Invites => Set<Invite>();
         public DbSet<InviteUsage> InviteUsages => Set<InviteUsage>();
+        public DbSet<ContactRequest> ContactRequests => Set<ContactRequest>();
+        public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
+        public DbSet<LoginHistory> LoginHistories => Set<LoginHistory>();
+        public DbSet<ServiceLink> ServiceLinks => Set<ServiceLink>();
+        public DbSet<UserProfile> UserProfiles => Set<UserProfile>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

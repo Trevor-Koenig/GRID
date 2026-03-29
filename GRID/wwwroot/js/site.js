@@ -1,17 +1,34 @@
-﻿ //Please see documentation at https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
+ //Please see documentation at https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
  //for details on configuring this project to bundle and minify static web assets.
 
 const root = document.documentElement;
 
-const setTheme = theme => {
-    root.dataset.bsTheme = theme;
-    localStorage.setItem("theme", theme);
+const saveThemeToAccount = async (theme) => {
+    const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+    if (!token) return; // not authenticated or no antiforgery token on page
+    try {
+        await fetch(`/api/theme?theme=${theme}`, {
+            method: 'POST',
+            headers: { 'RequestVerificationToken': token }
+        });
+    } catch { /* ignore network errors */ }
 };
 
-// Initialize theme: localStorage → system preference
+const setTheme = (theme, persist = true) => {
+    root.dataset.bsTheme = theme;
+    localStorage.setItem("theme", theme);
+    if (persist) saveThemeToAccount(theme);
+};
+
+// Initialize: user account preference → localStorage → system preference
+const userThemeMeta = document.querySelector('meta[name="user-theme"]');
+const userTheme = userThemeMeta?.content;
+
 setTheme(
+    userTheme ||
     localStorage.getItem("theme") ||
-    (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
+    (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"),
+    false // don't re-save on init
 );
 
 // Attach listeners for theme buttons

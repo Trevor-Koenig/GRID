@@ -13,7 +13,16 @@
 
     <div class="container" data-aos="fade-up" data-aos-delay="100">
         <div class="row justify-content-center">
-            <div class="col-lg-10">
+            <div class="col-lg-11">
+
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success d-flex align-items-center gap-2 mb-3">
+                        <i class="bi bi-check-circle-fill"></i>
+                        <span>@TempData["SuccessMessage"]</span>
+                    </div>
+                }
+
                 <div class="admin-panel-card">
                     <div class="admin-panel-header">
                         <span><i class="bi bi-people me-2"></i>All Users</span>
@@ -35,13 +44,15 @@
                                         <th>Email</th>
                                         <th>Role</th>
                                         <th>Confirmed</th>
+                                        <th>Last Login</th>
+                                        <th>Status</th>
                                         <th></th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach (var user in Model.Users)
                                     {
-                                        <tr>
+                                        <tr class="@(user.IsDeactivated ? "opacity-50" : "")">
                                             <td class="align-middle">
                                                 <i class="bi bi-person-circle me-2 text-muted"></i>@user.Email
                                             </td>
@@ -65,17 +76,58 @@
                                                     <i class="bi bi-clock text-warning"></i>
                                                 }
                                             </td>
+                                            <td class="align-middle text-muted" style="font-size:0.8rem;">
+                                                @(user.LastLogin.HasValue ? user.LastLogin.Value.ToLocalTime().ToString("MMM d, yyyy") : "Never")
+                                            </td>
+                                            <td class="align-middle">
+                                                @if (user.IsDeactivated)
+                                                {
+                                                    <span class="admin-role-badge admin-role-badge--inactive">Deactivated</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="admin-role-badge admin-role-badge--user">Active</span>
+                                                }
+                                            </td>
                                             <td class="align-middle text-end">
-                                                <a asp-page="./Details" asp-route-id="@user.Id" class="admin-action-link">
+                                                <a asp-page="./Details" asp-route-id="@user.Id" class="admin-action-link" title="Details">
                                                     <i class="bi bi-eye"></i>
+                                                </a>
+                                                <a asp-page="./LoginHistory" asp-route-id="@user.Id" class="admin-action-link ms-3" title="Login history">
+                                                    <i class="bi bi-clock-history"></i>
                                                 </a>
                                                 <button type="button" class="admin-action-link btn btn-link p-0 ms-3"
                                                         data-bs-toggle="modal" data-bs-target="#editRoleModal"
                                                         data-user-id="@user.Id"
                                                         data-user-email="@user.Email"
-                                                        data-current-role="@(user.Roles.FirstOrDefault() ?? "")">
-                                                    <i class="bi bi-pencil"></i>
+                                                        data-current-role="@(user.Roles.FirstOrDefault() ?? "")"
+                                                        title="Edit role">
+                                                    <i class="bi bi-shield-lock"></i>
                                                 </button>
+                                                <form method="post" asp-page-handler="PasswordReset" class="d-inline ms-3">
+                                                    <input type="hidden" name="userId" value="@user.Id" />
+                                                    <button type="submit" class="admin-action-link btn btn-link p-0" title="Send password reset email">
+                                                        <i class="bi bi-key"></i>
+                                                    </button>
+                                                </form>
+                                                @if (user.IsDeactivated)
+                                                {
+                                                    <form method="post" asp-page-handler="Reactivate" class="d-inline ms-3">
+                                                        <input type="hidden" name="userId" value="@user.Id" />
+                                                        <button type="submit" class="admin-action-link btn btn-link p-0" title="Reactivate user">
+                                                            <i class="bi bi-person-check"></i>
+                                                        </button>
+                                                    </form>
+                                                }
+                                                else
+                                                {
+                                                    <form method="post" asp-page-handler="Deactivate" class="d-inline ms-3">
+                                                        <input type="hidden" name="userId" value="@user.Id" />
+                                                        <button type="submit" class="admin-action-link btn btn-link p-0" title="Deactivate user">
+                                                            <i class="bi bi-person-dash"></i>
+                                                        </button>
+                                                    </form>
+                                                }
                                             </td>
                                         </tr>
                                     }
@@ -141,15 +193,10 @@
     <script>
         document.getElementById('editRoleModal').addEventListener('show.bs.modal', function (event) {
             const btn = event.relatedTarget;
-            const userId = btn.dataset.userId;
-            const email = btn.dataset.userEmail;
-            const currentRole = btn.dataset.currentRole;
-
-            document.getElementById('modalUserId').value = userId;
-            document.getElementById('modalUserEmail').textContent = email;
-
+            document.getElementById('modalUserId').value = btn.dataset.userId;
+            document.getElementById('modalUserEmail').textContent = btn.dataset.userEmail;
             this.querySelectorAll('input[name="selectedRole"]').forEach(radio => {
-                radio.checked = radio.value === currentRole;
+                radio.checked = radio.value === btn.dataset.currentRole;
             });
         });
     </script>

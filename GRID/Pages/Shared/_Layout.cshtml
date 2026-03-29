@@ -1,9 +1,29 @@
-﻿<!DOCTYPE html>
+﻿@inject GRID.Data.ApplicationDbContext _layoutDb
+@inject Microsoft.AspNetCore.Identity.UserManager<Microsoft.AspNetCore.Identity.IdentityUser> _layoutUserManager
+@inject GRID.Services.IServiceStatusService _statusService
+@{
+    string? userTheme = null;
+    if (User.Identity?.IsAuthenticated == true)
+    {
+        var uid = _layoutUserManager.GetUserId(User);
+        var profile = uid != null ? await _layoutDb.UserProfiles.FindAsync(uid) : null;
+        userTheme = profile?.Theme;
+    }
+    var navLinks = await _layoutDb.ServiceLinks
+        .Where(s => s.IsActive && s.ShowInNav)
+        .OrderBy(s => s.DisplayOrder)
+        .ToListAsync();
+}
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>GRID - @ViewData["Title"]</title>
+    @if (userTheme != null)
+    {
+        <meta name="user-theme" content="@userTheme" />
+    }
     <script type="importmap"></script>
     <!-- Favicons -->
     <link href="~/images/favicon/favicon-32x32.png" rel="icon">
@@ -50,18 +70,38 @@
                             <li class="dropdown">
                                 <a href="#"><span>Quick Services</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
                                 <ul>
-                                    <li><a href="https://flix.trevorsystems.com">Jellyfin</a></li>
-                                    <li><a href="https://photos.trevorsystems.com">Immich</a></li>
-                                    <li><a>File Swap (WIP)</a><li>
+                                    @foreach (var svc in navLinks)
+                                    {
+                                        <li>
+                                            <a href="/go/@svc.Token">
+                                                @if (!string.IsNullOrEmpty(svc.IconClass))
+                                                {
+                                                    <i class="@svc.IconClass me-1"></i>
+                                                }
+                                                @svc.Name
+                                                @{
+                                                    var st = _statusService.GetStatus(svc.Token);
+                                                }
+                                                @if (st != null)
+                                                {
+                                                    <span class="nav-status-dot nav-status-dot--@(st.IsUp ? "up" : "down")"></span>
+                                                }
+                                            </a>
+                                        </li>
+                                    }
+                                    <li><a>File Swap (WIP)</a></li>
                                     @if (User.IsInRole("Admin"))
                                     {
                                     <li class="dropdown">
                                         <a href="#"><span>Admin Services</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
                                         <ul>
-                                            <li><a href="https://truenas.trevorsystems.com">TrueNAS Dashboard</a></li>
-                                            <li><a href="https://zoraxy.trevorsystems.com">Zoraxy Dashboard</a></li>
+                                            <li><a asp-page="/Admin/Dashboard/Index"><i class="bi bi-speedometer2 me-1"></i>Dashboard</a></li>
                                             <li><a asp-page="/Admin/Users/Index">Users</a></li>
                                             <li><a asp-page="/Admin/Roles/Index">Roles</a></li>
+                                            <li><a asp-page="/Admin/Invites/Index">Invites</a></li>
+                                            <li><a asp-page="/Admin/ContactRequests/Index">Contact Requests</a></li>
+                                            <li><a asp-page="/Admin/Services/Index">Services</a></li>
+                                            <li><a asp-page="/Admin/AuditLog/Index">Audit Log</a></li>
                                         </ul>
                                     </li>
                                     }

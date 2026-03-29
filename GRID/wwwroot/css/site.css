@@ -303,3 +303,100 @@ html[data-bs-theme="dark"] .auth-bg-overlay {
 .auth-logo span {
     color: var(--accent-color);
 }
+
+/* Contact form */
+.contact .contact-form input[type=text],
+.contact .contact-form input[type=email],
+.contact .contact-form textarea {
+    font-size: 14px;
+    padding: 10px 15px;
+    box-shadow: none;
+    border-radius: 0;
+    color: var(--default-color);
+    background-color: color-mix(in srgb, var(--background-color), transparent 50%);
+    border-color: color-mix(in srgb, var(--default-color), transparent 80%);
+}
+
+.contact .contact-form input[type=text]:focus,
+.contact .contact-form input[type=email]:focus,
+.contact .contact-form textarea:focus {
+    border-color: var(--accent-color);
+}
+
+.contact .contact-form input[type=text]::placeholder,
+.contact .contact-form input[type=email]::placeholder,
+.contact .contact-form textarea::placeholder {
+    color: color-mix(in srgb, var(--default-color), transparent 70%);
+}
+
+.contact .contact-form button[type=submit] {
+    color: var(--contrast-color);
+    background: var(--accent-color);
+    border: 0;
+    padding: 10px 30px;
+    transition: 0.4s;
+    border-radius: 4px;
+}
+
+.contact .contact-form button[type=submit]:hover {
+    background: color-mix(in srgb, var(--accent-color), transparent 20%);
+}
+
+/* Admin stat cards */
+.admin-stat-card {
+    background: var(--surface-color, #fff);
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    height: 100%;
+    transition: box-shadow 0.2s;
+}
+
+.admin-stat-card--alert {
+    border: 2px solid color-mix(in srgb, var(--accent-color) 60%, transparent);
+}
+
+.admin-stat-icon {
+    font-size: 1.75rem;
+    color: var(--accent-color);
+    margin-bottom: 0.5rem;
+}
+
+.admin-stat-value {
+    font-size: 2.25rem;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 0.25rem;
+}
+
+.admin-stat-label {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    opacity: 0.6;
+    font-weight: 600;
+}
+
+.admin-stat-sub {
+    font-size: 0.8rem;
+    opacity: 0.5;
+    margin-top: 0.2rem;
+}
+
+/* Service status dots */
+.admin-status-dot,
+.nav-status-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-left: 4px;
+    vertical-align: middle;
+}
+
+.admin-status-dot--up,
+.nav-status-dot--up    { background: #22c55e; }
+.admin-status-dot--down,
+.nav-status-dot--down  { background: #ef4444; }
+.admin-status-dot--unknown { background: #9ca3af; }

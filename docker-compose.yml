@@ -24,5 +24,10 @@ services:
     ports:
       - 35510:8080
       - 35511:8081
+    volumes:
+      - grid_keys:/app/keys
     depends_on:
       - db
+
+volumes:
+  grid_keys:
