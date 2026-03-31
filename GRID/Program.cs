@@ -45,6 +45,7 @@ builder.Services.AddRazorPages(options =>
     options.Conventions.AuthorizeFolder("/Admin/ContactRequests", "ManageContacts");
     options.Conventions.AuthorizeFolder("/Admin/Services", "ManageServices");
     options.Conventions.AuthorizeFolder("/Admin/AuditLog", "ViewAuditLog");
+    options.Conventions.AuthorizeFolder("/Admin/Docs", "ManageDocs");
 });
 builder.Services.AddAuthorizationBuilder()
     .AddPolicy("AdminOnly", policy => policy.AddRequirements(new PermissionRequirement(Permissions.AdminAccess)))
@@ -54,7 +55,9 @@ builder.Services.AddAuthorizationBuilder()
     .AddPolicy("ManageInvites", policy => policy.AddRequirements(new PermissionRequirement(Permissions.AdminInvites)))
     .AddPolicy("ManageContacts", policy => policy.AddRequirements(new PermissionRequirement(Permissions.AdminContacts)))
     .AddPolicy("ManageServices", policy => policy.AddRequirements(new PermissionRequirement(Permissions.AdminServices)))
-    .AddPolicy("ViewAuditLog", policy => policy.AddRequirements(new PermissionRequirement(Permissions.AdminAuditLog)));
+    .AddPolicy("ViewAuditLog", policy => policy.AddRequirements(new PermissionRequirement(Permissions.AdminAuditLog)))
+    .AddPolicy("ManageDocs", policy => policy.AddRequirements(new PermissionRequirement(Permissions.AdminDocs)))
+    .AddPolicy("CanViewPrivateDocs", policy => policy.AddRequirements(new PermissionRequirement(Permissions.DocsView)));
 
 /***********************************
  * 
@@ -202,8 +205,9 @@ using (var scope = app.Services.CreateScope())
             // Admin gets everything
             foreach (var perm in Permissions.All)
                 defaultPerms.Add(new RolePermission { RoleName = "Admin", Permission = perm });
-            // User gets service access
+            // User gets service access and public+private doc viewing
             defaultPerms.Add(new RolePermission { RoleName = "User", Permission = Permissions.ServicesUse });
+            defaultPerms.Add(new RolePermission { RoleName = "User", Permission = Permissions.DocsView });
             context.RolePermissions.AddRange(defaultPerms);
             await context.SaveChangesAsync();
         }

@@ -14,6 +14,10 @@ namespace GRID.Models
         // Service usage
         public const string ServicesUse = "services.use";
 
+        // Documentation
+        public const string DocsView = "docs.view";
+        public const string AdminDocs = "admin.docs";
+
         public static readonly string[] All =
         [
             AdminAccess,
@@ -23,7 +27,9 @@ namespace GRID.Models
             AdminContacts,
             AdminServices,
             AdminAuditLog,
+            AdminDocs,
             ServicesUse,
+            DocsView,
         ];
 
         public static readonly Dictionary<string, string> Labels = new()
@@ -35,7 +41,9 @@ namespace GRID.Models
             [AdminContacts] = "Manage Contact Requests",
             [AdminServices] = "Manage Services",
             [AdminAuditLog] = "View Audit Log",
+            [AdminDocs]     = "Manage Documentation",
             [ServicesUse]   = "Use Quick Services",
+            [DocsView]      = "View Private Documentation",
         };
     }
 }

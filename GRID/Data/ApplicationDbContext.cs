@@ -14,6 +14,7 @@ namespace GRID.Data
         public DbSet<ServiceLink> ServiceLinks => Set<ServiceLink>();
         public DbSet<UserProfile> UserProfiles => Set<UserProfile>();
         public DbSet<RolePermission> RolePermissions => Set<RolePermission>();
+        public DbSet<DocArticle> DocArticles => Set<DocArticle>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -45,6 +46,10 @@ namespace GRID.Data
 
             modelBuilder.Entity<RolePermission>()
                 .HasIndex(rp => new { rp.RoleName, rp.Permission })
+                .IsUnique();
+
+            modelBuilder.Entity<DocArticle>()
+                .HasIndex(d => new { d.Category, d.Slug })
                 .IsUnique();
         }
     }
