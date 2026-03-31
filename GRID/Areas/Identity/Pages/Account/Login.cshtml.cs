@@ -15,10 +15,12 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Logging;
 
 namespace GRID.Areas.Identity.Pages.Account
 {
+    [EnableRateLimiting("LoginLimiter")]
     public class LoginModel : PageModel
     {
         private readonly SignInManager<IdentityUser> _signInManager;
@@ -129,6 +131,9 @@ namespace GRID.Areas.Identity.Pages.Account
 
                 var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
 
+                var rawIp = HttpContext.Connection.RemoteIpAddress;
+                var ip = rawIp?.IsIPv4MappedToIPv6 == true ? rawIp.MapToIPv4().ToString() : rawIp?.ToString();
+
                 // Record login history
                 if (user != null)
                 {
@@ -137,9 +142,7 @@ namespace GRID.Areas.Identity.Pages.Account
                         UserId = user.Id,
                         UserEmail = Input.Email,
                         Succeeded = result.Succeeded,
-                        IpAddress = HttpContext.Connection.RemoteIpAddress is { } ip
-                            ? (ip.IsIPv4MappedToIPv6 ? ip.MapToIPv4().ToString() : ip.ToString())
-                            : null,
+                        IpAddress = ip,
                         Timestamp = DateTime.UtcNow
                     });
                     await _db.SaveChangesAsync();
@@ -157,10 +160,26 @@ namespace GRID.Areas.Identity.Pages.Account
                 if (result.IsLockedOut)
                 {
                     _logger.LogWarning("User account locked out.");
+                    _db.AuditLogs.Add(new AuditLog
+                    {
+                        Action = "FailedLogin",
+                        ActorEmail = Input.Email,
+                        IpAddress = ip,
+                        Details = "Account locked out"
+                    });
+                    await _db.SaveChangesAsync();
                     return RedirectToPage("./Lockout");
                 }
                 else
                 {
+                    _db.AuditLogs.Add(new AuditLog
+                    {
+                        Action = "FailedLogin",
+                        ActorEmail = Input.Email,
+                        IpAddress = ip,
+                        Details = user == null ? "Email not found" : "Wrong password"
+                    });
+                    await _db.SaveChangesAsync();
                     ModelState.AddModelError(string.Empty, "Invalid login attempt.");
                     return Page();
                 }

@@ -350,7 +350,16 @@ html[data-bs-theme="dark"] .auth-bg-overlay {
     text-align: center;
     box-shadow: 0 2px 12px rgba(0,0,0,0.08);
     height: 100%;
-    transition: box-shadow 0.2s;
+    transition: box-shadow 0.2s, transform 0.2s;
+}
+
+a > .admin-stat-card {
+    color: var(--default-color);
+}
+
+a:hover > .admin-stat-card {
+    box-shadow: 0 6px 20px rgba(0,0,0,0.14);
+    transform: translateY(-2px);
 }
 
 .admin-stat-card--alert {

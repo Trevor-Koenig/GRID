@@ -1,0 +1,28 @@
+@model string
+
+@{
+    var navItems = new[]
+    {
+        ("Users",         "/Admin/Users/Index",           "bi-people"),
+        ("Roles",         "/Admin/Roles/Index",            "bi-shield"),
+        ("Permissions",   "/Admin/RolePermissions/Index",  "bi-lock"),
+        ("Invites",       "/Admin/Invites/Index",          "bi-ticket-perforated"),
+        ("Contacts",      "/Admin/ContactRequests/Index",  "bi-envelope"),
+    };
+}
+
+<div class="admin-panel-card mb-4">
+    <div class="admin-panel-header">
+        <span>Management</span>
+    </div>
+    <div class="p-3 d-flex flex-wrap gap-2">
+        @foreach (var (label, path, icon) in navItems)
+        {
+            var active = Model == label;
+            <a asp-page="@path"
+               class="btn btn-sm @(active ? "btn-secondary" : "btn-outline-secondary")">
+                <i class="bi @icon me-1"></i>@label
+            </a>
+        }
+    </div>
+</div>

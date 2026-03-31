@@ -53,7 +53,8 @@ namespace GRID.Middleware
                     ActorEmail = userEmail,
                     EntityType = "Page",
                     EntityId = $"{context.Request.Method} {path}",
-                    Details = $"IP: {ip} | Status: {status}",
+                    IpAddress = ip,
+                    HttpStatus = status,
                     Timestamp = DateTime.UtcNow
                 });
 

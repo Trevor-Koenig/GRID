@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -218,7 +219,7 @@ namespace GRID.Areas.Identity.Pages.Account
                     string roleToAssign;
                     if (_env.IsDevelopment())
                     {
-                        var isFirstUser = _userManager.Users.Count() == 1;
+                        var isFirstUser = await _userManager.Users.CountAsync() == 1;
                         roleToAssign = isFirstUser ? "Admin" : "User";
                     }
                     else

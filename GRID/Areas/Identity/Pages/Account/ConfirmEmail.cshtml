@@ -1,0 +1,31 @@
+@page
+@model ConfirmEmailModel
+@{
+    ViewData["Title"] = "Confirm Email";
+    Layout = "/Pages/Shared/_Layout.cshtml";
+}
+
+<div class="auth-bg">
+    <div class="auth-card-wrapper">
+        <div class="auth-card text-center">
+            <a asp-page="/Index" class="auth-logo">
+                <h1 class="sitename">GR<span>I</span>D</h1>
+            </a>
+            @if (Model.StatusMessage?.StartsWith("Thank") == true)
+            {
+                <h2 class="fs-5 fw-semibold mb-2">Email confirmed</h2>
+                <p class="text-muted mb-4" style="font-size:0.9rem;">Your email address has been verified successfully.</p>
+                <a asp-page="/Account/Login" asp-area="Identity" class="btn btn-primary w-100">Sign in</a>
+            }
+            else
+            {
+                <h2 class="fs-5 fw-semibold mb-2">Confirmation failed</h2>
+                <p class="text-muted mb-4" style="font-size:0.9rem;">
+                    We couldn't verify your email. The link may have expired.<br>
+                    Try registering again or contact support.
+                </p>
+                <a asp-page="/Account/Register" asp-area="Identity" class="btn btn-outline-secondary w-100">Back to register</a>
+            }
+        </div>
+    </div>
+</div>

@@ -14,17 +14,21 @@ using System.Threading.RateLimiting;
 var builder = WebApplication.CreateBuilder(args);
 
 /***********************************
- * 
+ *
  * DEFAULT/PRE-BUILT SERVICES
- * 
+ *
  **********************************/
 builder.Configuration.AddEnvironmentVariables();
 var connectionString = builder.Configuration["ConnectionStrings:DefaultConnection"] ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
-var keyPath = builder.Configuration["DataProtection:KeyPath"] ?? "/app/keys";
-builder.Services.AddDataProtection()
-    .PersistKeysToFileSystem(new DirectoryInfo(keyPath))
+var dpBuilder = builder.Services.AddDataProtection()
     .SetApplicationName("GRID");
+
+if (!builder.Environment.IsDevelopment())
+{
+    var keyPath = builder.Configuration["DataProtection:KeyPath"] ?? "/app/keys";
+    dpBuilder.PersistKeysToFileSystem(new DirectoryInfo(keyPath));
+}
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
@@ -66,19 +70,22 @@ builder.Services.AddAuthorizationBuilder()
  * 
  **********************************/
 // email service (through Mailgun)
-var apiKey = builder.Configuration["Mailgun:ApiKey"];
-if (string.IsNullOrWhiteSpace(apiKey))
+if (!builder.Environment.IsDevelopment())
 {
-    throw new InvalidOperationException("Mailgun API key not configured! Check Docker environment variables.");
+    var apiKey = builder.Configuration["Mailgun:ApiKey"];
+    if (string.IsNullOrWhiteSpace(apiKey))
+        throw new InvalidOperationException("Mailgun API key not configured! Check Docker environment variables.");
 }
 builder.Services.AddHttpClient();
 if (builder.Environment.IsDevelopment())
 {
     builder.Services.AddTransient<IEmailSender, DevEmailSender>();
+    builder.Services.AddTransient<IExtendedEmailSender, DevEmailSender>();
 }
 else
 {
     builder.Services.AddTransient<IEmailSender, MailgunApiEmailSender>();
+    builder.Services.AddTransient<IExtendedEmailSender, MailgunApiEmailSender>();
 }
 
 // invite code service
@@ -108,13 +115,66 @@ builder.Services.AddHostedService<ContactRequestReminderService>();
 
 builder.Services.AddRateLimiter(options =>
 {
+    options.RejectionStatusCode = 429;
+    options.OnRejected = async (ctx, token) =>
+    {
+        ctx.HttpContext.Response.StatusCode = 429;
+        await ctx.HttpContext.Response.WriteAsync("Too many requests. Please try again later.", token);
+    };
+
+    // Global safety net: 300 req/min per IP
+    options.GlobalLimiter = System.Threading.RateLimiting.PartitionedRateLimiter.Create<HttpContext, string>(ctx =>
+        System.Threading.RateLimiting.RateLimitPartition.GetFixedWindowLimiter(
+            ctx.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            _ => new System.Threading.RateLimiting.FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 300,
+                Window = TimeSpan.FromMinutes(1),
+                QueueLimit = 0
+            }));
+
+    // Invite redemption: 10/min per IP (existing)
     options.AddFixedWindowLimiter("InviteLimiter", opt =>
     {
-        opt.PermitLimit = 10;             // max 10 requests
-        opt.Window = TimeSpan.FromMinutes(1);  // per minute
+        opt.PermitLimit = 10;
+        opt.Window = TimeSpan.FromMinutes(1);
         opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
-        opt.QueueLimit = 2;               // invoke small queue so that they can not have too many concurrent attempts
+        opt.QueueLimit = 2;
     });
+
+    // Login: 10 attempts per 5 minutes per IP
+    options.AddPolicy("LoginLimiter", ctx =>
+        System.Threading.RateLimiting.RateLimitPartition.GetSlidingWindowLimiter(
+            ctx.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            _ => new System.Threading.RateLimiting.SlidingWindowRateLimiterOptions
+            {
+                PermitLimit = 10,
+                Window = TimeSpan.FromMinutes(5),
+                SegmentsPerWindow = 5,
+                QueueLimit = 0
+            }));
+
+    // Contact form: 5 submissions per 10 minutes per IP
+    options.AddPolicy("ContactLimiter", ctx =>
+        System.Threading.RateLimiting.RateLimitPartition.GetFixedWindowLimiter(
+            ctx.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            _ => new System.Threading.RateLimiting.FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 5,
+                Window = TimeSpan.FromMinutes(10),
+                QueueLimit = 0
+            }));
+
+    // API endpoints: 60 req/min per IP
+    options.AddPolicy("ApiLimiter", ctx =>
+        System.Threading.RateLimiting.RateLimitPartition.GetFixedWindowLimiter(
+            ctx.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            _ => new System.Threading.RateLimiting.FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 60,
+                Window = TimeSpan.FromMinutes(1),
+                QueueLimit = 0
+            }));
 });
 
 
@@ -126,7 +186,8 @@ builder.Services.AddRateLimiter(options =>
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
     options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
-    // Clear defaults so the Docker network proxy is trusted
+    // Clear both lists so any upstream proxy (Docker bridge, reverse proxy) is trusted
+    options.KnownIPNetworks.Clear();
     options.KnownProxies.Clear();
 });
 
@@ -139,6 +200,27 @@ var app = builder.Build();
 
 // Must be first — rewrites RemoteIpAddress from X-Forwarded-For before any other middleware reads it
 app.UseForwardedHeaders();
+
+// Security headers on every response
+app.Use(async (context, next) =>
+{
+    var headers = context.Response.Headers;
+    headers["X-Frame-Options"] = "DENY";
+    headers["X-Content-Type-Options"] = "nosniff";
+    headers["Referrer-Policy"] = "strict-origin-when-cross-origin";
+    headers["X-XSS-Protection"] = "0";
+    headers["Content-Security-Policy"] =
+        "default-src 'self'; " +
+        "script-src 'self' 'unsafe-inline'; " +
+        "style-src 'self' 'unsafe-inline'; " +
+        "img-src 'self' data:; " +
+        "font-src 'self' data:; " +
+        "connect-src 'self'; " +
+        "frame-ancestors 'none'; " +
+        "form-action 'self'; " +
+        "base-uri 'self';";
+    await next();
+});
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -156,8 +238,11 @@ app.UseHttpsRedirection();
 
 app.UseRouting();
 
+app.UseRateLimiter();
+
 app.UseAuthorization();
 
+app.UseMiddleware<GRID.Middleware.AdminTwoFactorMiddleware>();
 app.UseMiddleware<GRID.Middleware.PageViewTrackingMiddleware>();
 
 app.MapStaticAssets();
@@ -175,7 +260,49 @@ app.MapPost("/api/theme", async (HttpContext ctx, ApplicationDbContext db, strin
     profile.Theme = theme;
     await db.SaveChangesAsync();
     return Results.Ok();
-}).RequireAuthorization();
+}).RequireAuthorization().RequireRateLimiting("ApiLimiter");
+
+// Page duration tracking API
+app.MapPost("/api/page-duration", async (HttpContext ctx, ApplicationDbContext db, Stream body) =>
+{
+    // Validate Origin header to prevent cross-site beacon abuse
+    if (ctx.Request.Headers.TryGetValue("Origin", out var origin))
+    {
+        if (!Uri.TryCreate(origin, UriKind.Absolute, out var originUri) ||
+            !originUri.Host.Equals(ctx.Request.Host.Host, StringComparison.OrdinalIgnoreCase))
+        {
+            return Results.Forbid();
+        }
+    }
+
+    using var reader = new System.IO.StreamReader(body);
+    var json = await reader.ReadToEndAsync();
+    var data = System.Text.Json.JsonSerializer.Deserialize<PageDurationRequest>(json,
+        new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+    if (data == null || data.Duration <= 0 || string.IsNullOrWhiteSpace(data.Path))
+        return Results.BadRequest();
+
+    var userId = ctx.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+    var entityId = "GET " + data.Path;
+    var cutoff = DateTime.UtcNow.AddHours(-1);
+
+    var log = await db.AuditLogs
+        .Where(l => l.Action == "PageView"
+               && l.EntityId == entityId
+               && l.DurationSeconds == null
+               && l.Timestamp >= cutoff
+               && l.ActorId == userId)
+        .OrderByDescending(l => l.Timestamp)
+        .FirstOrDefaultAsync();
+
+    if (log != null)
+    {
+        log.DurationSeconds = Math.Min(data.Duration, 86400);
+        await db.SaveChangesAsync();
+    }
+
+    return Results.Ok();
+}).RequireRateLimiting("ApiLimiter");
 
 // Apply migrations and seed roles at startup
 using (var scope = app.Services.CreateScope())
@@ -249,3 +376,5 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.Run();
+
+record PageDurationRequest(string Path, int Duration);

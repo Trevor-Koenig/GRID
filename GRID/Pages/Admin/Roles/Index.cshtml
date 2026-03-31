@@ -14,6 +14,7 @@
     <div class="container" data-aos="fade-up" data-aos-delay="100">
         <div class="row justify-content-center">
             <div class="col-lg-6">
+                <partial name="_ManagementNav" model="@("Roles")" />
                 <div class="admin-panel-card">
                     <div class="admin-panel-header">
                         <span><i class="bi bi-shield me-2"></i>Roles</span>
@@ -53,9 +54,7 @@
                 </div>
 
                 <div class="mt-3">
-                    <a asp-page="/Admin/Users/Index" class="admin-back-link">
-                        <i class="bi bi-arrow-left me-1"></i>Back to Users
-                    </a>
+                    <a asp-page="/Admin/Dashboard/Index" class="admin-back-link"><i class="bi bi-speedometer2 me-1"></i>Dashboard</a>
                 </div>
             </div>
         </div>
