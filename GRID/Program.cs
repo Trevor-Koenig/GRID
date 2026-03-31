@@ -4,6 +4,7 @@ using GRID.Models;
 using GRID.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.RateLimiting;
@@ -118,11 +119,26 @@ builder.Services.AddRateLimiter(options =>
 
 
 /***********************************
- * 
+ *
+ * FORWARDED HEADERS (reverse proxy / Docker)
+ *
+ **********************************/
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    // Clear defaults so the Docker network proxy is trusted
+    options.KnownProxies.Clear();
+});
+
+/***********************************
+ *
  * BUILD APP
- * 
+ *
  **********************************/
 var app = builder.Build();
+
+// Must be first — rewrites RemoteIpAddress from X-Forwarded-For before any other middleware reads it
+app.UseForwardedHeaders();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -218,7 +234,7 @@ using (var scope = app.Services.CreateScope())
             context.ServiceLinks.AddRange(
                 new ServiceLink { Name = "Jellyfin", Token = "j8kx2m", Url = "https://flix.trevorsystems.com", IconClass = "bi bi-film", Description = "Media server", RequiresAuth = true, IsActive = true, ShowInNav = true, ShowInHero = true, ShowInServices = true, DisplayOrder = 1 },
                 new ServiceLink { Name = "Immich", Token = "p4nr9v", Url = "https://photos.trevorsystems.com", IconClass = "bi bi-images", Description = "Photo library", RequiresAuth = true, IsActive = true, ShowInNav = true, ShowInHero = true, ShowInServices = true, DisplayOrder = 2 },
-                new ServiceLink { Name = "Mealie", Token = "f2qw5t", Url = "https://food.trevorsystems.com", IconClass = "bi bi-egg-fried", Description = "Recipe manager", RequiresAuth = true, IsActive = true, ShowInNav = true, ShowInHero = true, ShowInServices = true, DisplayOrder = 3 },
+                new ServiceLink { Name = "Mealie", Token = "f2qw5t", Url = "https://food.trevorsystems.com", IconClass = "bi bi-egg-fried", Description = "Recipe manager", RequiresAuth = true, IsActive = true, ShowInNav = true, ShowInHero = false, ShowInServices = true, DisplayOrder = 3 },
                 new ServiceLink { Name = "AMP", Token = "xn4a8p", Url = "https://amp.shulker.tech", IconClass = "bi bi-music-note-beamed", Description = "Music streaming", RequiresAuth = true, IsActive = true, ShowInNav = true, ShowInHero = true, ShowInServices = true, DisplayOrder = 4 }
             );
             await context.SaveChangesAsync();

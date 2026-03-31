@@ -1,0 +1,64 @@
+@page
+@model TwoFactorAuthenticationModel
+@{
+    ViewData["Title"] = "Two-Factor Authentication";
+    ViewData["Subtitle"] = "Add an extra layer of security to your account";
+    ViewData["ActivePage"] = ManageNavPages.TwoFactorAuthentication;
+}
+
+<partial name="_StatusMessage" for="StatusMessage" />
+
+<div class="admin-panel-card">
+    <div class="admin-panel-header">
+        <span>Authenticator App</span>
+        @if (Model.Is2faEnabled)
+        {
+            <span class="badge bg-success">Enabled</span>
+        }
+        else
+        {
+            <span class="badge bg-secondary">Disabled</span>
+        }
+    </div>
+    <div class="p-4">
+        @if (Model.Is2faEnabled)
+        {
+            <p class="mb-3">Two-factor authentication is active on your account.</p>
+            <div class="d-flex flex-wrap gap-2 mb-3">
+                @if (Model.RecoveryCodesLeft == 0)
+                {
+                    <div class="alert alert-warning w-100" role="alert">
+                        You have no recovery codes left. Generate new ones before you lose access to your authenticator app.
+                    </div>
+                }
+                else if (Model.RecoveryCodesLeft <= 3)
+                {
+                    <div class="alert alert-warning w-100" role="alert">
+                        You only have @Model.RecoveryCodesLeft recovery code@(Model.RecoveryCodesLeft == 1 ? "" : "s") remaining. Consider generating a new set.
+                    </div>
+                }
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+                <a asp-page="./EnableAuthenticator" class="btn btn-sm btn-outline-secondary">Reconfigure Authenticator</a>
+                <a asp-page="./GenerateRecoveryCodes" class="btn btn-sm btn-outline-secondary">Generate Recovery Codes</a>
+                @if (Model.IsMachineRemembered)
+                {
+                    <form method="post" class="d-inline">
+                        <button type="submit" class="btn btn-sm btn-outline-secondary">Forget This Browser</button>
+                    </form>
+                }
+                <a asp-page="./Disable2fa" class="btn btn-sm btn-outline-danger">Disable 2FA</a>
+            </div>
+        }
+        else if (Model.HasAuthenticator)
+        {
+            <p class="mb-3">Your authenticator app is not enabled.</p>
+            <a asp-page="./EnableAuthenticator" class="btn btn-primary btn-sm">Enable Authenticator</a>
+        }
+        else
+        {
+            <p class="mb-3">You have not configured an authenticator app yet. Set one up to protect your account.</p>
+            <a asp-page="./EnableAuthenticator" class="btn btn-primary btn-sm">Set Up Authenticator</a>
+        }
+    </div>
+</div>

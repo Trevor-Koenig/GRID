@@ -137,7 +137,9 @@ namespace GRID.Areas.Identity.Pages.Account
                         UserId = user.Id,
                         UserEmail = Input.Email,
                         Succeeded = result.Succeeded,
-                        IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString(),
+                        IpAddress = HttpContext.Connection.RemoteIpAddress is { } ip
+                            ? (ip.IsIPv4MappedToIPv6 ? ip.MapToIPv4().ToString() : ip.ToString())
+                            : null,
                         Timestamp = DateTime.UtcNow
                     });
                     await _db.SaveChangesAsync();

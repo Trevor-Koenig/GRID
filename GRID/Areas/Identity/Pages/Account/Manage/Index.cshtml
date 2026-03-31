@@ -1,0 +1,60 @@
+@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Account";
+    ViewData["Subtitle"] = "Manage your profile and settings";
+    ViewData["ActivePage"] = ManageNavPages.Index;
+}
+
+<partial name="_StatusMessage" for="StatusMessage" />
+
+<div class="admin-panel-card mb-4">
+    <div class="admin-panel-header">
+        <span>Profile</span>
+    </div>
+    <div class="p-4">
+        <div class="row gy-3">
+            <div class="col-sm-6">
+                <div class="text-muted" style="font-size:0.8rem;text-transform:uppercase;letter-spacing:.05em;">Email</div>
+                <div class="fw-semibold">@Model.Email</div>
+                @if (!Model.EmailConfirmed)
+                {
+                    <span class="badge bg-warning text-dark mt-1" style="font-size:0.7rem;">Unconfirmed</span>
+                }
+            </div>
+            <div class="col-sm-6">
+                <div class="text-muted" style="font-size:0.8rem;text-transform:uppercase;letter-spacing:.05em;">Username</div>
+                <div class="fw-semibold">@Model.Username</div>
+            </div>
+            @if (Model.MemberSince.HasValue)
+            {
+                <div class="col-sm-6">
+                    <div class="text-muted" style="font-size:0.8rem;text-transform:uppercase;letter-spacing:.05em;">Member since</div>
+                    <div class="fw-semibold">@Model.MemberSince.Value.ToString("MMMM d, yyyy")</div>
+                </div>
+            }
+            <div class="col-sm-6">
+                <div class="text-muted" style="font-size:0.8rem;text-transform:uppercase;letter-spacing:.05em;">Two-factor auth</div>
+                @if (Model.TwoFactorEnabled)
+                {
+                    <span class="badge bg-success">Enabled</span>
+                }
+                else
+                {
+                    <span class="badge bg-secondary">Disabled</span>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="admin-panel-card">
+    <div class="admin-panel-header">
+        <span>Quick Actions</span>
+    </div>
+    <div class="p-3 d-flex flex-wrap gap-2">
+        <a asp-page="./ChangePassword" class="btn btn-sm btn-outline-secondary">Change Password</a>
+        <a asp-page="./TwoFactorAuthentication" class="btn btn-sm btn-outline-secondary">Two-Factor Authentication</a>
+        <a asp-page="./PersonalData" class="btn btn-sm btn-outline-secondary">Personal Data</a>
+    </div>
+</div>
