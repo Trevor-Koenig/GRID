@@ -2,6 +2,7 @@ using GRID.Data;
 using GRID.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 
 namespace GRID.Pages
 {
@@ -11,10 +12,15 @@ namespace GRID.Pages
         public ContactRequest ContactInput { get; set; } = new();
 
         public bool ContactSent { get; set; }
+        public IList<ServiceLink> HomeServices { get; set; } = [];
 
-        public void OnGet()
+        public async Task OnGetAsync()
         {
             ContactSent = TempData["ContactSent"] as bool? ?? false;
+            HomeServices = await db.ServiceLinks
+                .Where(s => s.IsActive && s.ShowOnHomePage)
+                .OrderBy(s => s.DisplayOrder)
+                .ToListAsync();
         }
 
         public async Task<IActionResult> OnPostContactAsync()

@@ -1,6 +1,8 @@
 ﻿@inject GRID.Data.ApplicationDbContext _layoutDb
 @inject Microsoft.AspNetCore.Identity.UserManager<Microsoft.AspNetCore.Identity.IdentityUser> _layoutUserManager
 @inject GRID.Services.IServiceStatusService _statusService
+@inject GRID.Services.PermissionService _permissionService
+@inject Microsoft.AspNetCore.Authorization.IAuthorizationService _authorizationService
 @{
     string? userTheme = null;
     if (User.Identity?.IsAuthenticated == true)
@@ -74,10 +76,6 @@
                                     {
                                         <li>
                                             <a href="/go/@svc.Token">
-                                                @if (!string.IsNullOrEmpty(svc.IconClass))
-                                                {
-                                                    <i class="@svc.IconClass me-1"></i>
-                                                }
                                                 @svc.Name
                                                 @{
                                                     var st = _statusService.GetStatus(svc.Token);
@@ -89,19 +87,18 @@
                                             </a>
                                         </li>
                                     }
-                                    <li><a>File Swap (WIP)</a></li>
-                                    @if (User.IsInRole("Admin"))
+                                    @if ((await _authorizationService.AuthorizeAsync(User, null, "AdminOnly")).Succeeded)
                                     {
                                     <li class="dropdown">
-                                        <a href="#"><span>Admin Services</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
+                                        <a href="#"><span>Admin</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
                                         <ul>
                                             <li><a asp-page="/Admin/Dashboard/Index"><i class="bi bi-speedometer2 me-1"></i>Dashboard</a></li>
-                                            <li><a asp-page="/Admin/Users/Index">Users</a></li>
-                                            <li><a asp-page="/Admin/Roles/Index">Roles</a></li>
-                                            <li><a asp-page="/Admin/Invites/Index">Invites</a></li>
-                                            <li><a asp-page="/Admin/ContactRequests/Index">Contact Requests</a></li>
-                                            <li><a asp-page="/Admin/Services/Index">Services</a></li>
-                                            <li><a asp-page="/Admin/AuditLog/Index">Audit Log</a></li>
+                                            @if ((await _permissionService.UserHasPermissionAsync(User.Claims.Where(c => c.Type == System.Security.Claims.ClaimTypes.Role).Select(c => c.Value), GRID.Models.Permissions.AdminUsers))){ <li><a asp-page="/Admin/Users/Index">Users</a></li> }
+                                            @if ((await _permissionService.UserHasPermissionAsync(User.Claims.Where(c => c.Type == System.Security.Claims.ClaimTypes.Role).Select(c => c.Value), GRID.Models.Permissions.AdminRoles))){ <li><a asp-page="/Admin/Roles/Index">Roles</a></li> <li><a asp-page="/Admin/RolePermissions/Index">Permissions</a></li> }
+                                            @if ((await _permissionService.UserHasPermissionAsync(User.Claims.Where(c => c.Type == System.Security.Claims.ClaimTypes.Role).Select(c => c.Value), GRID.Models.Permissions.AdminInvites))){ <li><a asp-page="/Admin/Invites/Index">Invites</a></li> }
+                                            @if ((await _permissionService.UserHasPermissionAsync(User.Claims.Where(c => c.Type == System.Security.Claims.ClaimTypes.Role).Select(c => c.Value), GRID.Models.Permissions.AdminContacts))){ <li><a asp-page="/Admin/ContactRequests/Index">Contact Requests</a></li> }
+                                            @if ((await _permissionService.UserHasPermissionAsync(User.Claims.Where(c => c.Type == System.Security.Claims.ClaimTypes.Role).Select(c => c.Value), GRID.Models.Permissions.AdminServices))){ <li><a asp-page="/Admin/Services/Index">Services</a></li> }
+                                            @if ((await _permissionService.UserHasPermissionAsync(User.Claims.Where(c => c.Type == System.Security.Claims.ClaimTypes.Role).Select(c => c.Value), GRID.Models.Permissions.AdminAuditLog))){ <li><a asp-page="/Admin/AuditLog/Index">Audit Log</a></li> }
                                         </ul>
                                     </li>
                                     }

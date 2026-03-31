@@ -13,6 +13,7 @@ namespace GRID.Data
         public DbSet<LoginHistory> LoginHistories => Set<LoginHistory>();
         public DbSet<ServiceLink> ServiceLinks => Set<ServiceLink>();
         public DbSet<UserProfile> UserProfiles => Set<UserProfile>();
+        public DbSet<RolePermission> RolePermissions => Set<RolePermission>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -41,6 +42,10 @@ namespace GRID.Data
                     .HasColumnType("bytea")
                     .ValueGeneratedOnAddOrUpdate();
             });
+
+            modelBuilder.Entity<RolePermission>()
+                .HasIndex(rp => new { rp.RoleName, rp.Permission })
+                .IsUnique();
         }
     }
 }

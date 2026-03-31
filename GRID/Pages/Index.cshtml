@@ -25,24 +25,15 @@
         </div>
 
         <div class="row gy-4 mt-5 justify-content-center" data-aos="fade-up" data-aos-delay="200">
-            <div class="col-xl-2 col-md-4 col-6 div-link" data-aos="fade-up" data-aos-delay="300">
-                <div class="icon-box">
-                    <i class="bi bi-cloud-upload"></i>
-                    <h3>Flie Swap (Coming Soon)</h3>
+            @foreach (var svc in Model.HomeServices)
+            {
+                <div class="col-xl-2 col-md-4 col-6 div-link" data-aos="fade-up" data-aos-delay="300" data-href="/go/@svc.Token">
+                    <div class="icon-box">
+                        <i class="@(svc.IconClass ?? "bi bi-box-arrow-up-right")"></i>
+                        <h3>@svc.Name</h3>
+                    </div>
                 </div>
-            </div>
-            <div class="col-xl-2 col-md-4 col-6 div-link" data-aos="fade-up" data-aos-delay="300" data-href="/go/p4nr9v">
-                <div class="icon-box">
-                    <i class="bi bi-camera"></i>
-                    <h3>Immich</h3>
-                </div>
-            </div>
-            <div class="col-xl-2 col-md-4 col-6 div-link" data-aos="fade-up" data-aos-delay="300" data-href="/go/j8kx2m">
-                <div class="icon-box">
-                    <i class="bi bi-film"></i>
-                    <h3>Jellyfin</h3>
-                </div>
-            </div>
+            }
             <div class="col-xl-2 col-md-4 col-6 div-link" data-aos="fade-up" data-aos-delay="600" data-href="/#about">
                 <div class="icon-box">
                     <i class="bi bi-card-list"></i>
@@ -248,10 +239,10 @@
                     <div class="icon">
                         <i class="bi bi-bounding-box-circles"></i>
                     </div>
-                    <a href="~/#services" class="stretched-link">
-                        <h3>File Swap</h3>
+                    <a href="/go/xn4a8p" class="stretched-link">
+                        <h3>AMP</h3>
                     </a>
-                    <p>Transfer and store any files you want with no compression or cost. Deleting a file actually deletes the file.</p>
+                    <p>A self-hosted music streaming service. Stream your personal music library from anywhere.</p>
                 </div>
             </div><!-- End Service Item -->
 

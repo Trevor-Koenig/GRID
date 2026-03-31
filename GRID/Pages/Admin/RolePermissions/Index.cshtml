@@ -1,0 +1,74 @@
+@page
+@model GRID.Pages.Admin.RolePermissions.IndexModel
+@{
+    ViewData["Title"] = "Role Permissions";
+}
+
+<div class="container py-4">
+    <div class="d-flex align-items-center mb-4 gap-3">
+        <a asp-page="/Admin/Dashboard/Index" class="admin-back-link">
+            <i class="bi bi-arrow-left me-1"></i>Dashboard
+        </a>
+        <h3 class="mb-0 ms-1">Role Permissions</h3>
+    </div>
+
+    @if (Model.StatusMessage != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @Model.StatusMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <p class="text-muted mb-4" style="font-size:0.92rem;">
+        Each checkbox grants the selected role that capability. Changes take effect immediately for new requests (existing sessions re-check on next page load).
+    </p>
+
+    @foreach (var role in Model.Roles)
+    {
+        var perms = Model.RolePerms.GetValueOrDefault(role) ?? [];
+        <div class="admin-panel-card mb-4">
+            <div class="admin-panel-header">
+                <span><i class="bi bi-shield-lock me-2"></i>@role</span>
+            </div>
+            <form method="post" asp-page-handler="Save">
+                <input type="hidden" name="roleName" value="@role" />
+                <div class="p-3">
+                    <div class="row row-cols-1 row-cols-md-2 g-2">
+                        @foreach (var perm in Model.AllPermissions)
+                        {
+                            var labelId = $"perm_{role}_{perm}".Replace(".", "_");
+                            <div class="col">
+                                <div class="form-check">
+                                    <input class="form-check-input"
+                                           type="checkbox"
+                                           name="grantedPermissions"
+                                           value="@perm"
+                                           id="@labelId"
+                                           @(perms.Contains(perm) ? "checked" : "") />
+                                    <label class="form-check-label" for="@labelId">
+                                        <span class="fw-semibold" style="font-size:0.9rem;">@Model.PermissionLabels.GetValueOrDefault(perm, perm)</span>
+                                        <br><code style="font-size:0.75rem;opacity:0.6;">@perm</code>
+                                    </label>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+                <div class="admin-panel-footer justify-content-end">
+                    <button type="submit" class="btn btn-sm btn-primary">
+                        <i class="bi bi-floppy me-1"></i>Save @role Permissions
+                    </button>
+                </div>
+            </form>
+        </div>
+    }
+
+    @if (!Model.Roles.Any())
+    {
+        <div class="admin-panel-empty">
+            <i class="bi bi-shield-x"></i>
+            No roles found. Create roles first.
+        </div>
+    }
+</div>
