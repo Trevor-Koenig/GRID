@@ -75,7 +75,7 @@
                                         var isPageView = log.Action == "PageView";
                                         <tr class="@(isPageView ? "" : "table-active")">
                                             <td class="align-middle text-muted" style="font-size:0.8rem;white-space:nowrap;">
-                                                @log.Timestamp.ToLocalTime().ToString("MMM d, h:mm tt")
+                                                <span data-utc="@(log.Timestamp.ToUniversalTime().ToString("O"))">@(log.Timestamp.ToUniversalTime().ToString("MMM d, H:mm")) UTC</span>
                                             </td>
                                             <td class="align-middle" style="font-size:0.875rem;">
                                                 @if (log.ActorEmail != null)
@@ -193,3 +193,15 @@
         </div>
     </div>
 </section>
+
+@section Scripts {
+    <script>
+        document.querySelectorAll('[data-utc]').forEach(function (el) {
+            var d = new Date(el.dataset.utc);
+            el.textContent = d.toLocaleString(undefined, {
+                month: 'short', day: 'numeric',
+                hour: 'numeric', minute: '2-digit'
+            });
+        });
+    </script>
+}
