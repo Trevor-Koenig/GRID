@@ -1,0 +1,33 @@
+@page
+@model PersonalDataModel
+@{
+    ViewData["Title"] = "Personal Data";
+    ViewData["Subtitle"] = "Manage your personal data";
+    ViewData["ActivePage"] = ManageNavPages.PersonalData;
+}
+
+<div class="admin-panel-card mb-4">
+    <div class="admin-panel-header">
+        <span>Download Your Data</span>
+    </div>
+    <div class="p-4">
+        <p class="mb-3">Download a copy of all personal data associated with your account as a JSON file.</p>
+        <form id="download-data" asp-page="DownloadPersonalData" method="post">
+            <button class="btn btn-sm btn-outline-secondary" type="submit">Download</button>
+        </form>
+    </div>
+</div>
+
+<div class="admin-panel-card">
+    <div class="admin-panel-header">
+        <span>Delete Account</span>
+    </div>
+    <div class="p-4">
+        <p class="mb-3">Permanently delete your account and all associated data. <strong>This action cannot be undone.</strong></p>
+        <a id="delete" asp-page="DeletePersonalData" class="btn btn-sm btn-outline-danger">Delete Account</a>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

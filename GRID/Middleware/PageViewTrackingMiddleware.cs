@@ -40,7 +40,10 @@ namespace GRID.Middleware
                 var userEmail = context.User.Identity?.IsAuthenticated == true
                     ? context.User.Identity.Name
                     : null;
-                var ip = context.Connection.RemoteIpAddress?.ToString();
+                var rawIp = context.Connection.RemoteIpAddress;
+                var ip = rawIp?.IsIPv4MappedToIPv6 == true
+                    ? rawIp.MapToIPv4().ToString()
+                    : rawIp?.ToString();
                 var status = context.Response.StatusCode;
 
                 db.AuditLogs.Add(new AuditLog
