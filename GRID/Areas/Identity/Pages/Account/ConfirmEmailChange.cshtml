@@ -1,0 +1,31 @@
+@page
+@model ConfirmEmailChangeModel
+@{
+    ViewData["Title"] = "Confirm Email Change";
+    Layout = "/Pages/Shared/_Layout.cshtml";
+}
+
+<div class="auth-bg">
+    <div class="auth-card-wrapper">
+        <div class="auth-card text-center">
+            <a asp-page="/Index" class="auth-logo">
+                <h1 class="sitename">GR<span>I</span>D</h1>
+            </a>
+            @if (Model.StatusMessage?.StartsWith("Thank") == true || Model.StatusMessage?.Contains("changed") == true)
+            {
+                <h2 class="fs-5 fw-semibold mb-2">Email updated</h2>
+                <p class="text-muted mb-4" style="font-size:0.9rem;">Your email address has been changed successfully.</p>
+                <a asp-page="/Account/Manage/Email" asp-area="Identity" class="btn btn-primary w-100">Back to account</a>
+            }
+            else
+            {
+                <h2 class="fs-5 fw-semibold mb-2">Confirmation failed</h2>
+                <p class="text-muted mb-4" style="font-size:0.9rem;">
+                    We couldn't confirm your email change. The link may have expired.<br>
+                    Try again from your account settings.
+                </p>
+                <a asp-page="/Account/Manage/Email" asp-area="Identity" class="btn btn-outline-secondary w-100">Back to account</a>
+            }
+        </div>
+    </div>
+</div>

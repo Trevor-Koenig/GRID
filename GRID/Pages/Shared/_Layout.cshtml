@@ -164,5 +164,19 @@
     <script src="~/lib/gp-1.0.0/dist/js/main.js"></script>
 
     @await RenderSectionAsync("Scripts", required: false)
+    <script>
+        (function () {
+            var pageLoadTime = Date.now();
+            document.addEventListener('visibilitychange', function () {
+                if (document.visibilityState === 'hidden') {
+                    var duration = Math.round((Date.now() - pageLoadTime) / 1000);
+                    navigator.sendBeacon('/api/page-duration', new Blob(
+                        [JSON.stringify({ path: location.pathname, duration: duration })],
+                        { type: 'application/json' }
+                    ));
+                }
+            });
+        })();
+    </script>
 </body>
 </html>

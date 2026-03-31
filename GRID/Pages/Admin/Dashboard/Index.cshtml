@@ -16,34 +16,79 @@
         <!-- Stat Cards -->
         <div class="row gy-4 mb-4">
             <div class="col-md-3">
-                <div class="admin-stat-card">
-                    <div class="admin-stat-icon"><i class="bi bi-people"></i></div>
-                    <div class="admin-stat-value">@Model.TotalUsers</div>
-                    <div class="admin-stat-label">Total Users</div>
-                    <div class="admin-stat-sub">@Model.TotalAdmins admin@(Model.TotalAdmins == 1 ? "" : "s")</div>
-                </div>
+                <a asp-page="/Admin/Users/Index" class="text-decoration-none">
+                    <div class="admin-stat-card">
+                        <div class="admin-stat-icon"><i class="bi bi-people"></i></div>
+                        <div class="admin-stat-value">@Model.TotalUsers</div>
+                        <div class="admin-stat-label">Total Users</div>
+                        <div class="admin-stat-sub">@Model.TotalAdmins admin@(Model.TotalAdmins == 1 ? "" : "s")</div>
+                    </div>
+                </a>
             </div>
             <div class="col-md-3">
-                <div class="admin-stat-card @(Model.PendingContactRequests > 0 ? "admin-stat-card--alert" : "")">
-                    <div class="admin-stat-icon"><i class="bi bi-envelope"></i></div>
-                    <div class="admin-stat-value">@Model.PendingContactRequests</div>
-                    <div class="admin-stat-label">Pending Requests</div>
-                    <div class="admin-stat-sub">@Model.TotalContactRequests total</div>
-                </div>
+                <a asp-page="/Admin/ContactRequests/Index" asp-route-status="pending" class="text-decoration-none">
+                    <div class="admin-stat-card @(Model.PendingContactRequests > 0 ? "admin-stat-card--alert" : "")">
+                        <div class="admin-stat-icon"><i class="bi bi-envelope"></i></div>
+                        <div class="admin-stat-value">@Model.PendingContactRequests</div>
+                        <div class="admin-stat-label">Pending Requests</div>
+                        <div class="admin-stat-sub">@Model.TotalContactRequests total</div>
+                    </div>
+                </a>
             </div>
             <div class="col-md-3">
-                <div class="admin-stat-card">
-                    <div class="admin-stat-icon"><i class="bi bi-ticket-perforated"></i></div>
-                    <div class="admin-stat-value">@Model.ActiveInvites</div>
-                    <div class="admin-stat-label">Active Invites</div>
-                    <div class="admin-stat-sub">@Model.TotalInvites total</div>
-                </div>
+                <a asp-page="/Admin/Invites/Index" class="text-decoration-none">
+                    <div class="admin-stat-card">
+                        <div class="admin-stat-icon"><i class="bi bi-ticket-perforated"></i></div>
+                        <div class="admin-stat-value">@Model.ActiveInvites</div>
+                        <div class="admin-stat-label">Active Invites</div>
+                        <div class="admin-stat-sub">@Model.TotalInvites total</div>
+                    </div>
+                </a>
             </div>
             <div class="col-md-3">
-                <div class="admin-stat-card">
-                    <div class="admin-stat-icon"><i class="bi bi-hdd-network"></i></div>
-                    <div class="admin-stat-value">@Model.ActiveServices</div>
-                    <div class="admin-stat-label">Active Services</div>
+                <a asp-page="/Admin/Services/Index" class="text-decoration-none">
+                    <div class="admin-stat-card">
+                        <div class="admin-stat-icon"><i class="bi bi-hdd-network"></i></div>
+                        <div class="admin-stat-value">@Model.ActiveServices</div>
+                        <div class="admin-stat-label">Active Services</div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Page View Chart -->
+        <div class="row gy-3 mb-4">
+            <div class="col-12">
+                <div class="admin-panel-card">
+                    <div class="admin-panel-header">
+                        <span><i class="bi bi-bar-chart-line me-2"></i>Page Views — Last 14 Days</span>
+                        <span class="admin-panel-count">@Model.PageViewChart.Sum(d => d.Count) total</span>
+                    </div>
+                    <div class="p-3">
+                        @{
+                            var maxCount = Model.PageViewChart.Any() ? Math.Max(Model.PageViewChart.Max(d => d.Count), 1) : 1;
+                        }
+                        <div class="d-flex align-items-end gap-1" style="height:80px;">
+                            @foreach (var day in Model.PageViewChart)
+                            {
+                                var barHeight = (int)(day.Count * 80.0 / maxCount);
+                                var isToday = day.Date.Date == DateTime.UtcNow.Date;
+                                <div class="flex-fill d-flex flex-column align-items-center justify-content-end" style="min-width:0;"
+                                     title="@day.Date.ToString("MMM d"): @day.Count view@(day.Count == 1 ? "" : "s")">
+                                    <div style="width:100%;height:@(barHeight)px;background:@(isToday ? "var(--accent-color)" : "color-mix(in srgb,var(--accent-color) 50%,transparent)");border-radius:3px 3px 0 0;min-height:@(day.Count > 0 ? "3" : "0")px;"></div>
+                                </div>
+                            }
+                        </div>
+                        <div class="d-flex gap-1 mt-1">
+                            @foreach (var day in Model.PageViewChart)
+                            {
+                                var isToday = day.Date.Date == DateTime.UtcNow.Date;
+                                <div class="flex-fill text-center text-muted" style="font-size:0.65rem;min-width:0;overflow:hidden;">
+                                    @(isToday ? "Today" : day.Date.ToString("M/d"))
+                                </div>
+                            }
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -88,18 +133,73 @@
                                     <tr>
                                         <th>Actor</th>
                                         <th>Action</th>
-                                        <th>Details</th>
+                                        <th>Page / Entity</th>
+                                        <th>IP</th>
+                                        <th>Status</th>
+                                        <th>Notes</th>
                                         <th>Time</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach (var log in Model.RecentAuditLogs)
                                     {
-                                        <tr>
-                                            <td class="align-middle text-muted" style="font-size:0.875rem;">@log.ActorEmail</td>
-                                            <td class="align-middle">@log.Action</td>
-                                            <td class="align-middle text-muted" style="font-size:0.875rem;">@log.Details</td>
-                                            <td class="align-middle text-muted" style="font-size:0.875rem;">@log.Timestamp.ToLocalTime().ToString("MMM d, h:mm tt")</td>
+                                        var isPageView = log.Action == "PageView";
+                                        <tr class="@(isPageView ? "" : "table-active")">
+                                            <td class="align-middle" style="font-size:0.875rem;">
+                                                @if (log.ActorEmail != null)
+                                                {
+                                                    <span>@log.ActorEmail</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted fst-italic">Anonymous</span>
+                                                }
+                                            </td>
+                                            <td class="align-middle">
+                                                @if (isPageView)
+                                                {
+                                                    <span class="badge" style="background:color-mix(in srgb,var(--accent-color) 15%,transparent);color:var(--accent-color);font-weight:500;">
+                                                        <i class="bi bi-eye me-1"></i>View
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge" style="background:color-mix(in srgb,#e74c3c 15%,transparent);color:#e74c3c;font-weight:500;">
+                                                        <i class="bi bi-shield me-1"></i>@log.Action
+                                                    </span>
+                                                }
+                                            </td>
+                                            <td class="align-middle text-muted" style="font-size:0.875rem;">
+                                                <code style="font-size:0.8rem;">@log.EntityId</code>
+                                            </td>
+                                            <td class="align-middle text-muted" style="font-size:0.8rem;">
+                                                @if (log.IpAddress != null)
+                                                {
+                                                    <code style="font-size:0.8rem;">@log.IpAddress</code>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">—</span>
+                                                }
+                                            </td>
+                                            <td class="align-middle" style="font-size:0.875rem;">
+                                                @if (log.HttpStatus.HasValue)
+                                                {
+                                                    var sc = log.HttpStatus.Value;
+                                                    var statusColor = sc >= 500 ? "#e74c3c" : sc >= 400 ? "#e67e22" : sc >= 300 ? "#3498db" : "#27ae60";
+                                                    <span class="badge" style="background:color-mix(in srgb,@statusColor 15%,transparent);color:@statusColor;font-weight:500;">@sc</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">—</span>
+                                                }
+                                            </td>
+                                            <td class="align-middle text-muted" style="font-size:0.875rem;">
+                                                @if (!isPageView) { @log.Details }
+                                            </td>
+                                            <td class="align-middle text-muted" style="font-size:0.8rem;white-space:nowrap;">
+                                                @log.Timestamp.ToLocalTime().ToString("MMM d, h:mm tt")
+                                            </td>
                                         </tr>
                                     }
                                 </tbody>

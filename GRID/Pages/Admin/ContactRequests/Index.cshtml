@@ -15,6 +15,10 @@
         <div class="row justify-content-center">
             <div class="col-lg-11">
 
+                <partial name="_ManagementNav" model="@("Contacts")" />
+
+                <partial name="_StatusMessage" for="StatusMessage" />
+
                 <!-- Filter Bar -->
                 <form method="get" class="d-flex gap-2 mb-3 flex-wrap">
                     <input type="text" name="search" class="form-control form-control-sm" style="max-width:240px;"
@@ -134,9 +138,7 @@
                 </div>
 
                 <div class="mt-3">
-                    <a asp-page="/Admin/Users/Index" class="admin-back-link">
-                        <i class="bi bi-people me-1"></i>Manage Users
-                    </a>
+                    <a asp-page="/Admin/Dashboard/Index" class="admin-back-link"><i class="bi bi-speedometer2 me-1"></i>Dashboard</a>
                 </div>
             </div>
         </div>

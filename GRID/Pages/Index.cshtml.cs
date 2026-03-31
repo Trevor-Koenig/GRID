@@ -2,6 +2,7 @@ using GRID.Data;
 using GRID.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 
 namespace GRID.Pages
@@ -26,6 +27,7 @@ namespace GRID.Pages
             ServicesSection = active.Where(s => s.ShowInServices).ToList();
         }
 
+        [EnableRateLimiting("ContactLimiter")]
         public async Task<IActionResult> OnPostContactAsync()
         {
             if (!ModelState.IsValid)

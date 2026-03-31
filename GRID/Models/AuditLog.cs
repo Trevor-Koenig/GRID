@@ -10,5 +10,8 @@ namespace GRID.Models
         public string? EntityId { get; set; }
         public string? Details { get; set; }
         public DateTime Timestamp { get; set; } = DateTime.UtcNow;
+        public int? DurationSeconds { get; set; }
+        public string? IpAddress { get; set; }
+        public int? HttpStatus { get; set; }
     }
 }

@@ -8,13 +8,25 @@ namespace GRID.Pages.Admin.AuditLog
 {
     public class IndexModel(ApplicationDbContext db) : PageModel
     {
+        public const int PageSize = 50;
+
         public IList<Models.AuditLog> Logs { get; set; } = [];
+        public int TotalCount { get; set; }
+        public int TotalPages => (int)Math.Ceiling(TotalCount / (double)PageSize);
 
         [BindProperty(SupportsGet = true)]
         public string Filter { get; set; } = "all";
 
+        [BindProperty(SupportsGet = true)]
+        public string? Search { get; set; }
+
+        [BindProperty(SupportsGet = true)]
+        public int Page { get; set; } = 1;
+
         public async Task OnGetAsync()
         {
+            if (Page < 1) Page = 1;
+
             var query = db.AuditLogs.AsQueryable();
 
             query = Filter switch
@@ -24,9 +36,20 @@ namespace GRID.Pages.Admin.AuditLog
                 _           => query
             };
 
+            if (!string.IsNullOrWhiteSpace(Search))
+            {
+                var pattern = $"%{Search}%";
+                query = query.Where(l =>
+                    EF.Functions.ILike(l.ActorEmail ?? "", pattern) ||
+                    EF.Functions.ILike(l.IpAddress ?? "", pattern));
+            }
+
+            TotalCount = await query.CountAsync();
+
             Logs = await query
                 .OrderByDescending(l => l.Timestamp)
-                .Take(500)
+                .Skip((Page - 1) * PageSize)
+                .Take(PageSize)
                 .ToListAsync();
         }
     }
