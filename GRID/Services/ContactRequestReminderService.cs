@@ -44,54 +44,68 @@ namespace GRID.Services
                     .OrderByDescending(r => r.SubmittedAt)
                     .ToListAsync(stoppingToken);
 
-                if (!unread.Any())
-                {
-                    logger.LogInformation("No unread contact requests. Skipping reminder email.");
-                    return;
-                }
-
                 var admins = await userManager.GetUsersInRoleAsync("Admin");
 
-                var rows = string.Concat(unread.Select(r =>
-                {
-                    var preview = r.Message.Length > 100 ? r.Message[..100] + "…" : r.Message;
-                    return $"""
-                        <tr>
-                            <td style="padding:8px 12px;border-bottom:1px solid #eee;">{System.Net.WebUtility.HtmlEncode(r.Name)}</td>
-                            <td style="padding:8px 12px;border-bottom:1px solid #eee;">{System.Net.WebUtility.HtmlEncode(r.Email)}</td>
-                            <td style="padding:8px 12px;border-bottom:1px solid #eee;">{System.Net.WebUtility.HtmlEncode(r.Subject)}</td>
-                            <td style="padding:8px 12px;border-bottom:1px solid #eee;color:#555;">{System.Net.WebUtility.HtmlEncode(preview)}</td>
-                        </tr>
-                        """;
-                }));
+                string body;
+                string subject;
 
-                var html = $"""
-                    <div style="font-family:sans-serif;max-width:700px;margin:0 auto;">
-                        <h2 style="color:#333;">GRID — Unread Contact Requests</h2>
-                        <p>You have <strong>{unread.Count}</strong> unread contact request{(unread.Count == 1 ? "" : "s")} awaiting a response.</p>
-                        <table style="width:100%;border-collapse:collapse;font-size:14px;">
-                            <thead>
-                                <tr style="background:#f5f5f5;text-align:left;">
-                                    <th style="padding:8px 12px;">Name</th>
-                                    <th style="padding:8px 12px;">Email</th>
-                                    <th style="padding:8px 12px;">Subject</th>
-                                    <th style="padding:8px 12px;">Message preview</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {rows}
-                            </tbody>
-                        </table>
-                        <p style="margin-top:24px;font-size:12px;color:#999;">
-                            This is an automated weekly reminder from GRID sent every Sunday at 7 AM.
-                        </p>
-                    </div>
-                    """;
+                if (!unread.Any())
+                {
+                    subject = "GRID — Weekly Contact Summary";
+                    body = """
+                        <div style="font-family:sans-serif;max-width:700px;margin:0 auto;">
+                            <h2 style="color:#333;">GRID — Weekly Contact Summary</h2>
+                            <p>All caught up! There are no unread contact requests this week.</p>
+                            <p style="margin-top:24px;font-size:12px;color:#999;">
+                                This is an automated weekly reminder from GRID sent every Sunday at 7 AM.
+                            </p>
+                        </div>
+                        """;
+                }
+                else
+                {
+                    var rows = string.Concat(unread.Select(r =>
+                    {
+                        var preview = r.Message.Length > 100 ? r.Message[..100] + "…" : r.Message;
+                        return $"""
+                            <tr>
+                                <td style="padding:8px 12px;border-bottom:1px solid #eee;">{System.Net.WebUtility.HtmlEncode(r.Name)}</td>
+                                <td style="padding:8px 12px;border-bottom:1px solid #eee;">{System.Net.WebUtility.HtmlEncode(r.Email)}</td>
+                                <td style="padding:8px 12px;border-bottom:1px solid #eee;">{System.Net.WebUtility.HtmlEncode(r.Subject)}</td>
+                                <td style="padding:8px 12px;border-bottom:1px solid #eee;color:#555;">{System.Net.WebUtility.HtmlEncode(preview)}</td>
+                            </tr>
+                            """;
+                    }));
+
+                    subject = $"GRID — {unread.Count} unread contact request{(unread.Count == 1 ? "" : "s")}";
+                    body = $"""
+                        <div style="font-family:sans-serif;max-width:700px;margin:0 auto;">
+                            <h2 style="color:#333;">GRID — Unread Contact Requests</h2>
+                            <p>You have <strong>{unread.Count}</strong> unread contact request{(unread.Count == 1 ? "" : "s")} awaiting a response.</p>
+                            <table style="width:100%;border-collapse:collapse;font-size:14px;">
+                                <thead>
+                                    <tr style="background:#f5f5f5;text-align:left;">
+                                        <th style="padding:8px 12px;">Name</th>
+                                        <th style="padding:8px 12px;">Email</th>
+                                        <th style="padding:8px 12px;">Subject</th>
+                                        <th style="padding:8px 12px;">Message preview</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {rows}
+                                </tbody>
+                            </table>
+                            <p style="margin-top:24px;font-size:12px;color:#999;">
+                                This is an automated weekly reminder from GRID sent every Sunday at 7 AM.
+                            </p>
+                        </div>
+                        """;
+                }
 
                 foreach (var admin in admins)
                 {
                     if (string.IsNullOrEmpty(admin.Email)) continue;
-                    await emailSender.SendEmailAsync(admin.Email, $"GRID — {unread.Count} unread contact request{(unread.Count == 1 ? "" : "s")}", html);
+                    await emailSender.SendEmailAsync(admin.Email, subject, body);
                     logger.LogInformation("Reminder sent to {Email}.", admin.Email);
                 }
             }
