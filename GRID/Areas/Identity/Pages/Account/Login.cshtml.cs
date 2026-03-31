@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
+using GRID.Data;
+using GRID.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
@@ -20,11 +22,15 @@ namespace GRID.Areas.Identity.Pages.Account
     public class LoginModel : PageModel
     {
         private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly UserManager<IdentityUser> _userManager;
+        private readonly ApplicationDbContext _db;
         private readonly ILogger<LoginModel> _logger;
 
-        public LoginModel(SignInManager<IdentityUser> signInManager, ILogger<LoginModel> logger)
+        public LoginModel(SignInManager<IdentityUser> signInManager, UserManager<IdentityUser> userManager, ApplicationDbContext db, ILogger<LoginModel> logger)
         {
             _signInManager = signInManager;
+            _userManager = userManager;
+            _db = db;
             _logger = logger;
         }
 
@@ -109,9 +115,34 @@ namespace GRID.Areas.Identity.Pages.Account
 
             if (ModelState.IsValid)
             {
-                // This doesn't count login failures towards account lockout
-                // To enable password failures to trigger account lockout, set lockoutOnFailure: true
+                // Check deactivation before attempting sign-in
+                var user = await _userManager.FindByEmailAsync(Input.Email);
+                if (user != null)
+                {
+                    var profile = await _db.UserProfiles.FindAsync(user.Id);
+                    if (profile?.IsDeactivated == true)
+                    {
+                        ModelState.AddModelError(string.Empty, "This account has been deactivated. Please contact an administrator.");
+                        return Page();
+                    }
+                }
+
                 var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
+
+                // Record login history
+                if (user != null)
+                {
+                    _db.LoginHistories.Add(new LoginHistory
+                    {
+                        UserId = user.Id,
+                        UserEmail = Input.Email,
+                        Succeeded = result.Succeeded,
+                        IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString(),
+                        Timestamp = DateTime.UtcNow
+                    });
+                    await _db.SaveChangesAsync();
+                }
+
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User logged in.");

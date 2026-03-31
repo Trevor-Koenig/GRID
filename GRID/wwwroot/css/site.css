@@ -37,3 +37,409 @@ body {
     .main:has(> .hero:first-child) {
         padding-top: 0;
     }
+
+/* Admin panel */
+.admin-panel-card {
+    border: 1px solid color-mix(in srgb, var(--default-color) 12%, transparent);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.admin-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.85rem 1.25rem;
+    background: color-mix(in srgb, var(--accent-color) 8%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, var(--default-color) 12%, transparent);
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.admin-panel-count {
+    font-size: 0.8rem;
+    font-weight: 400;
+    opacity: 0.65;
+}
+
+.admin-panel-footer {
+    padding: 1rem 1.25rem;
+    border-top: 1px solid color-mix(in srgb, var(--default-color) 12%, transparent);
+    display: flex;
+    align-items: center;
+}
+
+.admin-panel-empty {
+    padding: 3rem 1.25rem;
+    text-align: center;
+    opacity: 0.5;
+}
+
+.admin-panel-empty i {
+    font-size: 2.5rem;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.admin-table {
+    margin: 0;
+}
+
+.admin-table thead th {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    opacity: 0.6;
+    font-weight: 600;
+    border-bottom-width: 1px;
+    padding: 0.65rem 1rem;
+}
+
+.admin-table tbody td {
+    padding: 0.75rem 1rem;
+    border-color: color-mix(in srgb, var(--default-color) 8%, transparent);
+}
+
+.admin-role-badge {
+    display: inline-block;
+    padding: 0.2em 0.65em;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    background: color-mix(in srgb, var(--accent-color) 15%, transparent);
+    color: var(--accent-color);
+    border: 1px solid color-mix(in srgb, var(--accent-color) 30%, transparent);
+}
+
+.admin-role-badge--admin {
+    background: color-mix(in srgb, #e74c3c 15%, transparent);
+    color: #e74c3c;
+    border-color: color-mix(in srgb, #e74c3c 35%, transparent);
+}
+
+.admin-role-badge--user {
+    background: color-mix(in srgb, var(--accent-color) 15%, transparent);
+    color: var(--accent-color);
+    border-color: color-mix(in srgb, var(--accent-color) 35%, transparent);
+}
+
+.admin-role-badge--inactive {
+    background: color-mix(in srgb, #888 15%, transparent);
+    color: #888;
+    border-color: color-mix(in srgb, #888 35%, transparent);
+}
+
+.admin-invite-code {
+    font-family: monospace;
+    font-size: 0.85rem;
+    letter-spacing: 0.05em;
+    background: color-mix(in srgb, var(--default-color) 6%, transparent);
+    padding: 0.15em 0.45em;
+    border-radius: 4px;
+    color: var(--default-color);
+}
+
+.admin-action-link {
+    color: var(--default-color);
+    opacity: 0.5;
+    transition: opacity 0.2s;
+    font-size: 1rem;
+}
+
+.admin-action-link:hover {
+    opacity: 1;
+    color: var(--accent-color);
+}
+
+.admin-back-link {
+    font-size: 0.9rem;
+    opacity: 0.7;
+    color: var(--default-color);
+    text-decoration: none;
+    transition: opacity 0.2s;
+}
+
+.admin-back-link:hover {
+    opacity: 1;
+    color: var(--accent-color);
+}
+
+.admin-detail-body {
+    padding: 0.5rem 0;
+}
+
+.admin-detail-row {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1.25rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--default-color) 6%, transparent);
+}
+
+.admin-detail-row:last-child {
+    border-bottom: none;
+}
+
+.admin-detail-label {
+    width: 140px;
+    flex-shrink: 0;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    opacity: 0.55;
+    font-weight: 600;
+}
+
+.admin-detail-value {
+    flex: 1;
+}
+
+.admin-role-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.admin-role-option {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    cursor: pointer;
+    margin: 0;
+}
+
+.admin-role-option input[type="radio"] {
+    cursor: pointer;
+}
+
+/* Admin modals */
+.admin-modal-content {
+    border: 1px solid color-mix(in srgb, var(--default-color) 15%, transparent);
+    border-radius: 8px;
+    background: var(--surface-color);
+}
+
+.admin-modal-header {
+    border-bottom: 1px solid color-mix(in srgb, var(--default-color) 10%, transparent);
+    padding: 0.9rem 1.25rem;
+}
+
+.admin-modal-footer {
+    border-top: 1px solid color-mix(in srgb, var(--default-color) 10%, transparent);
+    padding: 0.75rem 1.25rem;
+}
+
+.admin-modal-email {
+    font-size: 0.85rem;
+    opacity: 0.65;
+    margin: 0;
+}
+
+.admin-modal-cancel {
+    background: transparent;
+    border: 1px solid color-mix(in srgb, var(--default-color) 25%, transparent);
+    color: var(--default-color);
+}
+
+.admin-modal-cancel:hover {
+    background: color-mix(in srgb, var(--default-color) 8%, transparent);
+    color: var(--default-color);
+}
+
+/* Auth pages (login / register) */
+.auth-bg {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-bg-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.auth-bg-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.82);
+}
+
+html[data-bs-theme="dark"] .auth-bg-overlay {
+    background: rgba(0, 0, 0, 0.78);
+}
+
+.auth-card-wrapper {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 440px;
+    padding: 1rem;
+}
+
+.auth-card {
+    background: var(--surface-color, #fff);
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+}
+
+.auth-logo {
+    text-decoration: none;
+    display: inline-block;
+    margin-bottom: 1rem;
+}
+
+.auth-logo .sitename {
+    font-size: 2rem;
+    margin: 0;
+}
+
+.auth-logo span {
+    color: var(--accent-color);
+}
+
+/* Contact form */
+.contact .contact-form input[type=text],
+.contact .contact-form input[type=email],
+.contact .contact-form textarea {
+    font-size: 14px;
+    padding: 10px 15px;
+    box-shadow: none;
+    border-radius: 0;
+    color: var(--default-color);
+    background-color: color-mix(in srgb, var(--background-color), transparent 50%);
+    border-color: color-mix(in srgb, var(--default-color), transparent 80%);
+}
+
+.contact .contact-form input[type=text]:focus,
+.contact .contact-form input[type=email]:focus,
+.contact .contact-form textarea:focus {
+    border-color: var(--accent-color);
+}
+
+.contact .contact-form input[type=text]::placeholder,
+.contact .contact-form input[type=email]::placeholder,
+.contact .contact-form textarea::placeholder {
+    color: color-mix(in srgb, var(--default-color), transparent 70%);
+}
+
+.contact .contact-form button[type=submit] {
+    color: var(--contrast-color);
+    background: var(--accent-color);
+    border: 0;
+    padding: 10px 30px;
+    transition: 0.4s;
+    border-radius: 4px;
+}
+
+.contact .contact-form button[type=submit]:hover {
+    background: color-mix(in srgb, var(--accent-color), transparent 20%);
+}
+
+/* Admin stat cards */
+.admin-stat-card {
+    background: var(--surface-color, #fff);
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    height: 100%;
+    transition: box-shadow 0.2s;
+}
+
+.admin-stat-card--alert {
+    border: 2px solid color-mix(in srgb, var(--accent-color) 60%, transparent);
+}
+
+.admin-stat-icon {
+    font-size: 1.75rem;
+    color: var(--accent-color);
+    margin-bottom: 0.5rem;
+}
+
+.admin-stat-value {
+    font-size: 2.25rem;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 0.25rem;
+}
+
+.admin-stat-label {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    opacity: 0.6;
+    font-weight: 600;
+}
+
+.admin-stat-sub {
+    font-size: 0.8rem;
+    opacity: 0.5;
+    margin-top: 0.2rem;
+}
+
+/* Service status dots */
+.admin-status-dot,
+.nav-status-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-left: 4px;
+    vertical-align: middle;
+}
+
+.admin-status-dot--up,
+.nav-status-dot--up    { background: #22c55e; }
+.admin-status-dot--down,
+.nav-status-dot--down  { background: #ef4444; }
+.admin-status-dot--unknown { background: #9ca3af; }
+
+/* Docs sidebar navigation */
+.docs-nav-link {
+    font-size: 0.88rem;
+    color: inherit;
+    text-decoration: none;
+    transition: background 0.15s;
+}
+.docs-nav-link:hover { background: rgba(128,128,128,0.1); color: inherit; }
+.docs-nav-link--active { font-weight: 600; background: rgba(128,128,128,0.12); }
+
+/* Docs editor textarea */
+.docs-editor { resize: vertical; min-height: 400px; border: none; border-radius: 0; }
+.docs-editor:focus { box-shadow: none; }
+
+/* Docs article card hover */
+.docs-card { transition: box-shadow 0.15s; }
+.docs-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
+
+/* Docs rendered markdown content */
+.docs-content h1, .docs-content h2, .docs-content h3,
+.docs-content h4, .docs-content h5, .docs-content h6 { margin-top: 1.5rem; margin-bottom: 0.5rem; }
+.docs-content h1 { font-size: 1.6rem; }
+.docs-content h2 { font-size: 1.35rem; }
+.docs-content h3 { font-size: 1.15rem; }
+.docs-content p { margin-bottom: 1rem; }
+.docs-content ul, .docs-content ol { padding-left: 1.5rem; margin-bottom: 1rem; }
+.docs-content code { font-size: 0.875em; padding: 0.15em 0.35em; border-radius: 3px; background: rgba(128,128,128,0.15); }
+.docs-content pre { padding: 1rem; border-radius: 6px; overflow-x: auto; margin-bottom: 1rem; background: rgba(128,128,128,0.1); }
+.docs-content pre code { background: none; padding: 0; }
+.docs-content table { width: 100%; margin-bottom: 1rem; border-collapse: collapse; }
+.docs-content th, .docs-content td { padding: 0.5rem 0.75rem; border: 1px solid rgba(128,128,128,0.2); }
+.docs-content blockquote { border-left: 3px solid rgba(128,128,128,0.4); padding-left: 1rem; opacity: 0.8; margin-bottom: 1rem; }
+
+/* Mobile nav logout button styled as a plain link */
+.nav-link-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font: inherit;
+    color: inherit;
+}

@@ -5,6 +5,7 @@
 }
 
 @section Scripts {
+    <partial name="_ValidationScriptsPartial" />
     <script src="~/js/Pages/Index.js" asp-append-version="true"></script>
 }
 
@@ -24,24 +25,15 @@
         </div>
 
         <div class="row gy-4 mt-5 justify-content-center" data-aos="fade-up" data-aos-delay="200">
-            <div class="col-xl-2 col-md-4 col-6 div-link" data-aos="fade-up" data-aos-delay="300">
-                <div class="icon-box">
-                    <i class="bi bi-cloud-upload"></i>
-                    <h3>Flie Swap (Coming Soon)</h3>
+            @foreach (var svc in Model.HeroServices)
+            {
+                <div class="col-xl-2 col-md-4 col-6 div-link" data-aos="fade-up" data-aos-delay="300" data-href="/go/@svc.Token">
+                    <div class="icon-box">
+                        <i class="@(svc.IconClass ?? "bi bi-box-arrow-up-right")"></i>
+                        <h3>@svc.Name</h3>
+                    </div>
                 </div>
-            </div>
-            <div class="col-xl-2 col-md-4 col-6 div-link" data-aos="fade-up" data-aos-delay="300" data-href="https://photos.trevorsystems.com">
-                <div class="icon-box">
-                    <i class="bi bi-camera"></i>
-                    <h3>Immich</h3>
-                </div>
-            </div>
-            <div class="col-xl-2 col-md-4 col-6 div-link" data-aos="fade-up" data-aos-delay="300" data-href="https://flix.trevorsystems.com">
-                <div class="icon-box">
-                    <i class="bi bi-film"></i>
-                    <h3>Jellyfin</h3>
-                </div>
-            </div>
+            }
             <div class="col-xl-2 col-md-4 col-6 div-link" data-aos="fade-up" data-aos-delay="600" data-href="/#about">
                 <div class="icon-box">
                     <i class="bi bi-card-list"></i>
@@ -206,67 +198,24 @@
 
         <div class="row gy-4">
 
-            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
-                <div class="service-item position-relative">
-                    <div class="icon">
-                        <i class="bi bi-activity"></i>
+            @{ var svcDelay = 100; }
+            @foreach (var svc in Model.ServicesSection)
+            {
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="@svcDelay">
+                    <div class="service-item position-relative">
+                        <div class="icon">
+                            <i class="@(svc.IconClass ?? "bi bi-box-arrow-up-right")"></i>
+                        </div>
+                        <a href="/go/@svc.Token" class="stretched-link">
+                            <h3>@svc.Name</h3>
+                        </a>
+                        <p>@svc.Description</p>
                     </div>
-                    <a href="~/#services" class="stretched-link">
-                        <h3>Game Server Management Panel</h3>
-                    </a>
-                    <p>Create and manage all your gaming servers in one place. Don't fuss about port foewarding or making sure the server is running</p>
-                </div>
-            </div><!-- End Service Item -->
+                </div><!-- End Service Item -->
+                svcDelay += 100;
+            }
 
-            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
-                <div class="service-item position-relative">
-                    <div class="icon">
-                        <i class="bi bi-easel"></i>
-                    </div>
-                    <a href="https://flix.trevorsystems.com" target="_blank" class="stretched-link">
-                        <h3>Jellyfin</h3>
-                    </a>
-                    <p>Stream and watch any movies, shows, or audiobooks that you want. No extra fees or corporate bullshit.</p>
-                </div>
-            </div><!-- End Service Item -->
-
-            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
-                <div class="service-item position-relative">
-                    <div class="icon">
-                        <i class="bi bi-phone"></i>
-                    </div>
-                    <a href="https://photos.trevorsystems.com" target="_blank" class="stretched-link">
-                        <h3>Immich</h3>
-                    </a>
-                    <p>Backup your images all to one secure place with unlimited storage, no more paying for more than 15 GB.</p>
-                </div>
-            </div><!-- End Service Item -->
-
-            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="400">
-                <div class="service-item position-relative">
-                    <div class="icon">
-                        <i class="bi bi-bounding-box-circles"></i>
-                    </div>
-                    <a href="~/#services" class="stretched-link">
-                        <h3>File Swap</h3>
-                    </a>
-                    <p>Transfer and store any files you want with no compression or cost. Deleting a file actually deletes the file.</p>
-                </div>
-            </div><!-- End Service Item -->
-
-            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="500">
-                <div class="service-item position-relative">
-                    <div class="icon">
-                        <i class="bi bi-cookie"></i>
-                    </div>
-                    <a href="https://food.trevorsystems.com" target="_blank" class="stretched-link">
-                        <h3>Recipe Storage</h3>
-                    </a>
-                    <p>Store, manage, and browse an entire library of recipes. Never worry about losing your family recipes ever again.</p>
-                </div>
-            </div><!-- End Service Item -->
-
-            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="600">
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="@svcDelay">
                 <div class="service-item position-relative">
                     <div class="icon">
                         <i class="bi bi-chat-square-text"></i>
@@ -701,75 +650,40 @@
     </div><!-- End Section Title -->
 
     <div class="container" data-aos="fade-up" data-aos-delay="100">
-        @{
-            var showPersonalInfo = false;
-        }
-        @if (showPersonalInfo)
-        {
-            <div class="mb-4" data-aos="fade-up" data-aos-delay="200">
-                <iframe style="border:0; width: 100%; height: 270px;" src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d48389.78314118045!2d-74.006138!3d40.710059!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c25a22a3bda30d%3A0xb89d1fe6bc499443!2sDowntown%20Conference%20Center!5e0!3m2!1sen!2sus!4v1676961268712!5m2!1sen!2sus" frameborder="0" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-            </div>
-            <!-- End Google Maps -->
-        }
-
-        <div class="row gy-4">
-
-            @if (showPersonalInfo)
-            {
-
-                <div class="col-lg-4">
-                    <div class="info-item d-flex" data-aos="fade-up" data-aos-delay="300">
-                        <i class="bi bi-geo-alt flex-shrink-0"></i>
-                        <div>
-                            <h3>Address</h3>
-                            <p>A108 Adam Street, New York, NY 535022</p>
-                        </div>
-                    </div><!-- End Info Item -->
-
-                    <div class="info-item d-flex" data-aos="fade-up" data-aos-delay="400">
-                        <i class="bi bi-telephone flex-shrink-0"></i>
-                        <div>
-                            <h3>Call Us</h3>
-                            <p>+1 5589 55488 55</p>
-                        </div>
-                    </div><!-- End Info Item -->
-
-                    <div class="info-item d-flex" data-aos="fade-up" data-aos-delay="500">
-                        <i class="bi bi-envelope flex-shrink-0"></i>
-                        <div>
-                            <h3>Email Us</h3>
-                            <p>info@example.com</p>
-                        </div>
-                    </div><!-- End Info Item -->
-
-                </div>
-            }
-
+        <div class="row gy-4 justify-content-center">
             <div class="col-lg-8">
-                <form action="forms/contact.php" method="post" class="php-email-form" data-aos="fade-up" data-aos-delay="200">
+                @if (Model.ContactSent)
+                {
+                    <div class="alert alert-success d-flex align-items-center gap-2 mb-4" data-aos="fade-up">
+                        <i class="bi bi-check-circle-fill"></i>
+                        <span>Your message has been sent. Thank you!</span>
+                    </div>
+                }
+                <form method="post" asp-page-handler="Contact" class="contact-form" data-aos="fade-up" data-aos-delay="200">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
                     <div class="row gy-4">
 
                         <div class="col-md-6">
-                            <input type="text" name="name" class="form-control" placeholder="Your Name" required="">
+                            <input asp-for="ContactInput.Name" class="form-control" placeholder="Your Name" />
+                            <span asp-validation-for="ContactInput.Name" class="text-danger"></span>
                         </div>
 
-                        <div class="col-md-6 ">
-                            <input type="email" class="form-control" name="email" placeholder="Your Email" required="">
+                        <div class="col-md-6">
+                            <input asp-for="ContactInput.Email" class="form-control" placeholder="Your Email" />
+                            <span asp-validation-for="ContactInput.Email" class="text-danger"></span>
                         </div>
 
                         <div class="col-md-12">
-                            <input type="text" class="form-control" name="subject" placeholder="Subject" required="">
+                            <input asp-for="ContactInput.Subject" class="form-control" placeholder="Subject" />
+                            <span asp-validation-for="ContactInput.Subject" class="text-danger"></span>
                         </div>
 
                         <div class="col-md-12">
-                            <textarea class="form-control" name="message" rows="6" placeholder="Message" required=""></textarea>
+                            <textarea asp-for="ContactInput.Message" class="form-control" placeholder="Message" style="height:150px;"></textarea>
+                            <span asp-validation-for="ContactInput.Message" class="text-danger"></span>
                         </div>
 
                         <div class="col-md-12 text-center">
-                            <div class="loading">Loading</div>
-                            <div class="error-message"></div>
-                            <div class="sent-message">Your message has been sent. Thank you!</div>
-
                             <button type="submit">Send Message</button>
                         </div>
 

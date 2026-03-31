@@ -1,0 +1,202 @@
+@page "{category}/{slug}"
+@model GRID.Pages.Docs.ArticleModel
+@{
+    ViewData["Title"] = Model.EditMode ? $"Editing: {Model.Article.Title}" : Model.Article.Title;
+    var sidebarGroups = Model.SidebarArticles.GroupBy(a => a.Category).OrderBy(g => g.Key);
+}
+
+<section class="section">
+    <div class="container" data-aos="fade-up">
+        <div class="row">
+
+            <!-- Sidebar -->
+            <div class="col-lg-3 mb-4">
+                <div class="admin-panel-card">
+                    <div class="admin-panel-header">
+                        <span>Categories</span>
+                        @if (Model.IsAdmin)
+                        {
+                            <a asp-page="/Docs/Index" class="btn btn-outline-secondary btn-sm" style="font-size:0.75rem;">All Docs</a>
+                        }
+                    </div>
+                    <div class="p-2">
+                        @foreach (var group in sidebarGroups)
+                        {
+                            <div class="mb-3">
+                                <div class="fw-semibold px-2 py-1" style="font-size:0.8rem;text-transform:uppercase;letter-spacing:.05em;opacity:.6;">@group.Key</div>
+                                <ul class="list-unstyled mb-0">
+                                    @foreach (var article in group)
+                                    {
+                                        var isActive = article.Id == Model.Article.Id;
+                                        <li>
+                                            <a asp-page="/Docs/Article"
+                                               asp-route-category="@article.Category.ToLower()"
+                                               asp-route-slug="@article.Slug"
+                                               class="d-block px-2 py-1 rounded docs-nav-link @(isActive ? "docs-nav-link--active" : "") @(Model.IsAdmin && !article.IsPublished ? "fst-italic" : "")">
+                                                @article.Title
+                                                @if (!article.IsPublic)
+                                                {
+                                                    <span class="ms-1 badge bg-secondary" style="font-size:0.6rem;">Private</span>
+                                                }
+                                                @if (Model.IsAdmin && !article.IsPublished)
+                                                {
+                                                    <span class="ms-1 badge bg-warning text-dark" style="font-size:0.6rem;">Draft</span>
+                                                }
+                                            </a>
+                                        </li>
+                                    }
+                                </ul>
+                            </div>
+                        }
+                    </div>
+                </div>
+                @if (!Model.IsAdmin)
+                {
+                    <div class="mt-3">
+                        <a asp-page="/Docs/Index" class="admin-back-link">All Docs</a>
+                    </div>
+                }
+            </div>
+
+            <!-- Content area -->
+            <div class="col-lg-9">
+
+                @if (Model.EditMode)
+                {
+                    <!-- Edit mode: form left, preview right -->
+                    <form method="post" asp-page-handler="Save">
+                        <input type="hidden" name="id" value="@Model.Article.Id" />
+
+                        <!-- Metadata row -->
+                        <div class="admin-panel-card mb-3">
+                            <div class="admin-panel-header">
+                                <span>Editing Article</span>
+                                <div class="d-flex gap-2">
+                                    <a asp-page="/Docs/Article"
+                                       asp-route-category="@Model.Article.Category.ToLower()"
+                                       asp-route-slug="@Model.Article.Slug"
+                                       class="btn btn-sm btn-outline-secondary">View</a>
+                                    <button type="submit" class="btn btn-sm btn-primary">Save</button>
+                                </div>
+                            </div>
+                            <div class="p-3">
+                                <div class="row g-3">
+                                    <div class="col-md-5">
+                                        <div class="form-floating">
+                                            <input type="text" class="form-control" id="editTitle" name="title" value="@Model.Article.Title" placeholder="Title" required />
+                                            <label for="editTitle">Title</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-floating">
+                                            <input type="text" class="form-control" id="editCategory" name="category" value="@Model.Article.Category" placeholder="Category" required />
+                                            <label for="editCategory">Category</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="form-floating">
+                                            <input type="text" class="form-control" id="editSlug" name="slug" value="@Model.Article.Slug" placeholder="slug" required />
+                                            <label for="editSlug">Slug</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="form-floating">
+                                            <input type="number" class="form-control" id="editOrder" name="displayOrder" value="@Model.Article.DisplayOrder" placeholder="0" />
+                                            <label for="editOrder">Order</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-floating">
+                                            <input type="text" class="form-control" id="editToken" name="serviceToken" value="@Model.Article.ServiceToken" placeholder="token" />
+                                            <label for="editToken">Service token (optional)</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-8 d-flex align-items-center gap-4 ps-3">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="editPublished" name="isPublished" value="true" @(Model.Article.IsPublished ? "checked" : "") />
+                                            <label class="form-check-label" for="editPublished">Published</label>
+                                        </div>
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="editPublic" name="isPublic" value="true" @(Model.Article.IsPublic ? "checked" : "") />
+                                            <label class="form-check-label" for="editPublic">Public</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Editor and preview side by side -->
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="admin-panel-card h-100">
+                                    <div class="admin-panel-header"><span>Markdown</span></div>
+                                    <div class="p-2">
+                                        <textarea class="form-control font-monospace docs-editor" name="content" rows="30">@Model.Article.Content</textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="admin-panel-card h-100">
+                                    <div class="admin-panel-header">
+                                        <span>Preview</span>
+                                        <span class="text-muted" style="font-size:0.75rem;">Save to refresh</span>
+                                    </div>
+                                    <div class="p-4 docs-content">
+                                        @Html.Raw(Model.RenderedContent)
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2 mt-3">
+                            <a asp-page="/Docs/Article"
+                               asp-route-category="@Model.Article.Category.ToLower()"
+                               asp-route-slug="@Model.Article.Slug"
+                               class="btn btn-sm btn-outline-secondary">Discard &amp; View</a>
+                            <button type="submit" class="btn btn-primary btn-sm">Save</button>
+                        </div>
+                    </form>
+                }
+                else
+                {
+                    <!-- View mode -->
+                    <div class="admin-panel-card">
+                        <div class="admin-panel-header">
+                            <span>
+                                @Model.Article.Title
+                                @if (!Model.Article.IsPublic)
+                                {
+                                    <span class="ms-2 badge bg-secondary" style="font-size:0.7rem;">Private</span>
+                                }
+                                @if (Model.IsAdmin && !Model.Article.IsPublished)
+                                {
+                                    <span class="ms-2 badge bg-warning text-dark" style="font-size:0.7rem;">Draft</span>
+                                }
+                            </span>
+                            <div class="d-flex align-items-center gap-3">
+                                <span class="admin-panel-count">@Model.Article.Category</span>
+                                @if (Model.IsAdmin)
+                                {
+                                    <a asp-page="/Docs/Article"
+                                       asp-route-category="@Model.Article.Category.ToLower()"
+                                       asp-route-slug="@Model.Article.Slug"
+                                       asp-route-edit="true"
+                                       class="btn btn-sm btn-outline-secondary">Edit</a>
+                                }
+                            </div>
+                        </div>
+                        <div class="p-4 docs-content">
+                            @Html.Raw(Model.RenderedContent)
+                        </div>
+                        <div class="admin-panel-footer">
+                            <span class="text-muted" style="font-size:0.8rem;">
+                                Last updated @Model.Article.UpdatedAt.ToString("MMMM d, yyyy")
+                            </span>
+                        </div>
+                    </div>
+                }
+
+            </div>
+        </div>
+    </div>
+</section>

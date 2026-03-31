@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 #nullable disable
 
+using GRID.Data;
 using GRID.Models;
 using GRID.Services;
 using Microsoft.AspNetCore.Authentication;
@@ -33,6 +34,8 @@ namespace GRID.Areas.Identity.Pages.Account
         private readonly InviteService _inviteService;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IEmailSender _emailSender;
+        private readonly IWebHostEnvironment _env;
+        private readonly ApplicationDbContext _db;
 
         public RegisterModel(
             UserManager<IdentityUser> userManager,
@@ -41,7 +44,9 @@ namespace GRID.Areas.Identity.Pages.Account
             ILogger<RegisterModel> logger,
             InviteService inviteService,
             RoleManager<IdentityRole> roleManager,
-            IEmailSender emailSender)
+            IEmailSender emailSender,
+            IWebHostEnvironment env,
+            ApplicationDbContext db)
         {
             _userManager = userManager;
             _userStore = userStore;
@@ -51,6 +56,8 @@ namespace GRID.Areas.Identity.Pages.Account
             _inviteService = inviteService;
             _roleManager = roleManager;
             _emailSender = emailSender;
+            _env = env;
+            _db = db;
         }
 
         /// <summary>
@@ -136,10 +143,15 @@ namespace GRID.Areas.Identity.Pages.Account
             {
 
                 /******************
-                 * 
+                 *
                  * Custom Invite code validation logic
-                 * 
+                 *
                  ******************/
+
+                // In development, auto-create the invite code if it doesn't already exist
+                if (_env.IsDevelopment())
+                    await _inviteService.EnsureDevInviteAsync(Input.InviteCode);
+
                 var (isValid, invite) = await _inviteService.ValidateInviteAsync(Input.InviteCode);
                 if (!string.IsNullOrEmpty(Input.InviteCode))
                 {
@@ -195,17 +207,35 @@ namespace GRID.Areas.Identity.Pages.Account
                 // fuck there are so many await asyncs damn
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
-                // if the invite code used specifies a role to add the user to (and it exists) do that
-                if (!string.IsNullOrEmpty(invite.Role) &&
-                    await _roleManager.RoleExistsAsync(invite.Role))
-                {
-                    await _userManager.AddToRoleAsync(user, invite.Role);
-                }
                 var result = await _userManager.CreateAsync(user, Input.Password);
 
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User created a new account with password.");
+
+                    // In development: first account created becomes Admin, all others become User
+                    // In production: role comes from invite code, defaulting to User
+                    string roleToAssign;
+                    if (_env.IsDevelopment())
+                    {
+                        var isFirstUser = _userManager.Users.Count() == 1;
+                        roleToAssign = isFirstUser ? "Admin" : "User";
+                    }
+                    else
+                    {
+                        roleToAssign = !string.IsNullOrEmpty(invite.Role) && await _roleManager.RoleExistsAsync(invite.Role)
+                            ? invite.Role
+                            : "User";
+                    }
+                    await _userManager.AddToRoleAsync(user, roleToAssign);
+
+                    // Create user profile
+                    _db.UserProfiles.Add(new UserProfile
+                    {
+                        UserId = user.Id,
+                        CreatedAt = DateTime.UtcNow
+                    });
+                    await _db.SaveChangesAsync();
 
                     var userId = await _userManager.GetUserIdAsync(user);
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);

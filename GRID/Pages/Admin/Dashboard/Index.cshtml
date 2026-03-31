@@ -1,0 +1,114 @@
+@page
+@model GRID.Pages.Admin.Dashboard.IndexModel
+
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<section class="section">
+    <div class="container section-title" data-aos="fade-up">
+        <h2>Admin Dashboard</h2>
+        <p>Site overview and recent activity</p>
+    </div>
+
+    <div class="container" data-aos="fade-up" data-aos-delay="100">
+
+        <!-- Stat Cards -->
+        <div class="row gy-4 mb-4">
+            <div class="col-md-3">
+                <div class="admin-stat-card">
+                    <div class="admin-stat-icon"><i class="bi bi-people"></i></div>
+                    <div class="admin-stat-value">@Model.TotalUsers</div>
+                    <div class="admin-stat-label">Total Users</div>
+                    <div class="admin-stat-sub">@Model.TotalAdmins admin@(Model.TotalAdmins == 1 ? "" : "s")</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="admin-stat-card @(Model.PendingContactRequests > 0 ? "admin-stat-card--alert" : "")">
+                    <div class="admin-stat-icon"><i class="bi bi-envelope"></i></div>
+                    <div class="admin-stat-value">@Model.PendingContactRequests</div>
+                    <div class="admin-stat-label">Pending Requests</div>
+                    <div class="admin-stat-sub">@Model.TotalContactRequests total</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="admin-stat-card">
+                    <div class="admin-stat-icon"><i class="bi bi-ticket-perforated"></i></div>
+                    <div class="admin-stat-value">@Model.ActiveInvites</div>
+                    <div class="admin-stat-label">Active Invites</div>
+                    <div class="admin-stat-sub">@Model.TotalInvites total</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="admin-stat-card">
+                    <div class="admin-stat-icon"><i class="bi bi-hdd-network"></i></div>
+                    <div class="admin-stat-value">@Model.ActiveServices</div>
+                    <div class="admin-stat-label">Active Services</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Nav -->
+        <div class="row gy-3 mb-4">
+            <div class="col-12">
+                <div class="admin-panel-card">
+                    <div class="admin-panel-header"><span><i class="bi bi-grid me-2"></i>Management</span></div>
+                    <div class="p-3 d-flex flex-wrap gap-2">
+                        <a asp-page="/Admin/Users/Index" class="btn btn-sm btn-outline-secondary"><i class="bi bi-people me-1"></i>Users</a>
+                        <a asp-page="/Admin/Roles/Index" class="btn btn-sm btn-outline-secondary"><i class="bi bi-shield me-1"></i>Roles</a>
+                        <a asp-page="/Admin/Invites/Index" class="btn btn-sm btn-outline-secondary"><i class="bi bi-ticket-perforated me-1"></i>Invites</a>
+                        <a asp-page="/Admin/ContactRequests/Index" class="btn btn-sm btn-outline-secondary"><i class="bi bi-envelope me-1"></i>Contact Requests</a>
+                        <a asp-page="/Admin/Services/Index" class="btn btn-sm btn-outline-secondary"><i class="bi bi-hdd-network me-1"></i>Services</a>
+                        <a asp-page="/Admin/AuditLog/Index" class="btn btn-sm btn-outline-secondary"><i class="bi bi-journal-text me-1"></i>Audit Log</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="row">
+            <div class="col-12">
+                <div class="admin-panel-card">
+                    <div class="admin-panel-header">
+                        <span><i class="bi bi-clock-history me-2"></i>Recent Activity</span>
+                        <a asp-page="/Admin/AuditLog/Index" class="admin-action-link" style="font-size:0.8rem;">View all</a>
+                    </div>
+                    @if (!Model.RecentAuditLogs.Any())
+                    {
+                        <div class="admin-panel-empty">
+                            <i class="bi bi-journal"></i>
+                            <p>No activity recorded yet.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table admin-table">
+                                <thead>
+                                    <tr>
+                                        <th>Actor</th>
+                                        <th>Action</th>
+                                        <th>Details</th>
+                                        <th>Time</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var log in Model.RecentAuditLogs)
+                                    {
+                                        <tr>
+                                            <td class="align-middle text-muted" style="font-size:0.875rem;">@log.ActorEmail</td>
+                                            <td class="align-middle">@log.Action</td>
+                                            <td class="align-middle text-muted" style="font-size:0.875rem;">@log.Details</td>
+                                            <td class="align-middle text-muted" style="font-size:0.875rem;">@log.Timestamp.ToLocalTime().ToString("MMM d, h:mm tt")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
