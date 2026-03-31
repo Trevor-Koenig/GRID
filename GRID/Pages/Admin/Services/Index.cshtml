@@ -44,6 +44,8 @@
                                         <th>Status</th>
                                         <th>Auth</th>
                                         <th>Nav</th>
+                                        <th>Hero</th>
+                                        <th>Services</th>
                                         <th>Active</th>
                                         <th></th>
                                     </tr>
@@ -96,6 +98,26 @@
                                                 }
                                             </td>
                                             <td class="align-middle">
+                                                @if (link.ShowInHero)
+                                                {
+                                                    <i class="bi bi-check-circle-fill text-success"></i>
+                                                }
+                                                else
+                                                {
+                                                    <i class="bi bi-x-circle-fill text-danger"></i>
+                                                }
+                                            </td>
+                                            <td class="align-middle">
+                                                @if (link.ShowInServices)
+                                                {
+                                                    <i class="bi bi-check-circle-fill text-success"></i>
+                                                }
+                                                else
+                                                {
+                                                    <i class="bi bi-x-circle-fill text-danger"></i>
+                                                }
+                                            </td>
+                                            <td class="align-middle">
                                                 @if (link.IsActive)
                                                 {
                                                     <i class="bi bi-check-circle-fill text-success"></i>
@@ -117,7 +139,8 @@
                                                         data-service-requiresauth="@link.RequiresAuth.ToString().ToLower()"
                                                         data-service-isactive="@link.IsActive.ToString().ToLower()"
                                                         data-service-showinnav="@link.ShowInNav.ToString().ToLower()"
-                                                        data-service-showonhomepage="@link.ShowOnHomePage.ToString().ToLower()">
+                                                        data-service-showinhero="@link.ShowInHero.ToString().ToLower()"
+                                                        data-service-showinservices="@link.ShowInServices.ToString().ToLower()">
                                                     <i class="bi bi-pencil"></i>
                                                 </button>
                                                 <button type="button" class="admin-action-link btn btn-link p-0 ms-3"
@@ -189,8 +212,14 @@
                     </div>
                     <div class="mb-2">
                         <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" id="createShowOnHome" name="showOnHomePage" value="true" checked />
-                            <label class="form-check-label" for="createShowOnHome">Show on home page</label>
+                            <input class="form-check-input" type="checkbox" id="createShowInHero" name="showInHero" value="true" checked />
+                            <label class="form-check-label" for="createShowInHero">Show in hero section</label>
+                        </div>
+                    </div>
+                    <div class="mb-2">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="createShowInServices" name="showInServices" value="true" checked />
+                            <label class="form-check-label" for="createShowInServices">Show in services section</label>
                         </div>
                     </div>
                 </div>
@@ -254,8 +283,14 @@
                     </div>
                     <div class="mb-2">
                         <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" id="editShowOnHome" name="showOnHomePage" value="true" />
-                            <label class="form-check-label" for="editShowOnHome">Show on home page</label>
+                            <input class="form-check-input" type="checkbox" id="editShowInHero" name="showInHero" value="true" />
+                            <label class="form-check-label" for="editShowInHero">Show in hero section</label>
+                        </div>
+                    </div>
+                    <div class="mb-2">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="editShowInServices" name="showInServices" value="true" />
+                            <label class="form-check-label" for="editShowInServices">Show in services section</label>
                         </div>
                     </div>
                 </div>
@@ -303,7 +338,8 @@
             document.getElementById('editRequiresAuth').checked = b.dataset.serviceRequiresauth === 'true';
             document.getElementById('editIsActive').checked = b.dataset.serviceIsactive === 'true';
             document.getElementById('editShowInNav').checked = b.dataset.serviceShowinnav === 'true';
-            document.getElementById('editShowOnHome').checked = b.dataset.serviceShowonhomepage === 'true';
+            document.getElementById('editShowInHero').checked = b.dataset.serviceShowinhero === 'true';
+            document.getElementById('editShowInServices').checked = b.dataset.serviceShowinservices === 'true';
         });
 
         document.getElementById('deleteServiceModal').addEventListener('show.bs.modal', function (e) {

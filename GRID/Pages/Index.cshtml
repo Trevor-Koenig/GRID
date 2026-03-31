@@ -25,7 +25,7 @@
         </div>
 
         <div class="row gy-4 mt-5 justify-content-center" data-aos="fade-up" data-aos-delay="200">
-            @foreach (var svc in Model.HomeServices)
+            @foreach (var svc in Model.HeroServices)
             {
                 <div class="col-xl-2 col-md-4 col-6 div-link" data-aos="fade-up" data-aos-delay="300" data-href="/go/@svc.Token">
                     <div class="icon-box">
@@ -198,67 +198,24 @@
 
         <div class="row gy-4">
 
-            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
-                <div class="service-item position-relative">
-                    <div class="icon">
-                        <i class="bi bi-activity"></i>
+            @{ var svcDelay = 100; }
+            @foreach (var svc in Model.ServicesSection)
+            {
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="@svcDelay">
+                    <div class="service-item position-relative">
+                        <div class="icon">
+                            <i class="@(svc.IconClass ?? "bi bi-box-arrow-up-right")"></i>
+                        </div>
+                        <a href="/go/@svc.Token" class="stretched-link">
+                            <h3>@svc.Name</h3>
+                        </a>
+                        <p>@svc.Description</p>
                     </div>
-                    <a href="~/#services" class="stretched-link">
-                        <h3>Game Server Management Panel</h3>
-                    </a>
-                    <p>Create and manage all your gaming servers in one place. Don't fuss about port foewarding or making sure the server is running</p>
-                </div>
-            </div><!-- End Service Item -->
+                </div><!-- End Service Item -->
+                svcDelay += 100;
+            }
 
-            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
-                <div class="service-item position-relative">
-                    <div class="icon">
-                        <i class="bi bi-easel"></i>
-                    </div>
-                    <a href="/go/j8kx2m" class="stretched-link">
-                        <h3>Jellyfin</h3>
-                    </a>
-                    <p>Stream and watch any movies, shows, or audiobooks that you want. No extra fees or corporate bullshit.</p>
-                </div>
-            </div><!-- End Service Item -->
-
-            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
-                <div class="service-item position-relative">
-                    <div class="icon">
-                        <i class="bi bi-phone"></i>
-                    </div>
-                    <a href="/go/p4nr9v" class="stretched-link">
-                        <h3>Immich</h3>
-                    </a>
-                    <p>Backup your images all to one secure place with unlimited storage, no more paying for more than 15 GB.</p>
-                </div>
-            </div><!-- End Service Item -->
-
-            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="400">
-                <div class="service-item position-relative">
-                    <div class="icon">
-                        <i class="bi bi-bounding-box-circles"></i>
-                    </div>
-                    <a href="/go/xn4a8p" class="stretched-link">
-                        <h3>AMP</h3>
-                    </a>
-                    <p>A self-hosted music streaming service. Stream your personal music library from anywhere.</p>
-                </div>
-            </div><!-- End Service Item -->
-
-            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="500">
-                <div class="service-item position-relative">
-                    <div class="icon">
-                        <i class="bi bi-cookie"></i>
-                    </div>
-                    <a href="/go/f2qw5t" class="stretched-link">
-                        <h3>Recipe Storage</h3>
-                    </a>
-                    <p>Store, manage, and browse an entire library of recipes. Never worry about losing your family recipes ever again.</p>
-                </div>
-            </div><!-- End Service Item -->
-
-            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="600">
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="@svcDelay">
                 <div class="service-item position-relative">
                     <div class="icon">
                         <i class="bi bi-chat-square-text"></i>

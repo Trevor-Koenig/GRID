@@ -212,10 +212,10 @@ using (var scope = app.Services.CreateScope())
         if (!context.ServiceLinks.Any())
         {
             context.ServiceLinks.AddRange(
-                new ServiceLink { Name = "Jellyfin", Token = "j8kx2m", Url = "https://flix.trevorsystems.com", IconClass = "bi bi-film", Description = "Media server", RequiresAuth = true, IsActive = true, ShowInNav = true, ShowOnHomePage = true, DisplayOrder = 1 },
-                new ServiceLink { Name = "Immich", Token = "p4nr9v", Url = "https://photos.trevorsystems.com", IconClass = "bi bi-images", Description = "Photo library", RequiresAuth = true, IsActive = true, ShowInNav = true, ShowOnHomePage = true, DisplayOrder = 2 },
-                new ServiceLink { Name = "Mealie", Token = "f2qw5t", Url = "https://food.trevorsystems.com", IconClass = "bi bi-egg-fried", Description = "Recipe manager", RequiresAuth = true, IsActive = true, ShowInNav = true, ShowOnHomePage = true, DisplayOrder = 3 },
-                new ServiceLink { Name = "AMP", Token = "xn4a8p", Url = "https://amp.shulker.tech", IconClass = "bi bi-music-note-beamed", Description = "Music streaming", RequiresAuth = true, IsActive = true, ShowInNav = true, ShowOnHomePage = true, DisplayOrder = 4 }
+                new ServiceLink { Name = "Jellyfin", Token = "j8kx2m", Url = "https://flix.trevorsystems.com", IconClass = "bi bi-film", Description = "Media server", RequiresAuth = true, IsActive = true, ShowInNav = true, ShowInHero = true, ShowInServices = true, DisplayOrder = 1 },
+                new ServiceLink { Name = "Immich", Token = "p4nr9v", Url = "https://photos.trevorsystems.com", IconClass = "bi bi-images", Description = "Photo library", RequiresAuth = true, IsActive = true, ShowInNav = true, ShowInHero = true, ShowInServices = true, DisplayOrder = 2 },
+                new ServiceLink { Name = "Mealie", Token = "f2qw5t", Url = "https://food.trevorsystems.com", IconClass = "bi bi-egg-fried", Description = "Recipe manager", RequiresAuth = true, IsActive = true, ShowInNav = true, ShowInHero = true, ShowInServices = true, DisplayOrder = 3 },
+                new ServiceLink { Name = "AMP", Token = "xn4a8p", Url = "https://amp.shulker.tech", IconClass = "bi bi-music-note-beamed", Description = "Music streaming", RequiresAuth = true, IsActive = true, ShowInNav = true, ShowInHero = true, ShowInServices = true, DisplayOrder = 4 }
             );
             await context.SaveChangesAsync();
         }

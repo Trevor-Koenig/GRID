@@ -18,7 +18,7 @@ namespace GRID.Pages.Admin.Services
         }
 
         public async Task<IActionResult> OnPostCreateAsync(string name, string token, string url,
-            string? iconClass, string? description, bool requiresAuth, bool showInNav, bool showOnHomePage)
+            string? iconClass, string? description, bool requiresAuth, bool showInNav, bool showInHero, bool showInServices)
         {
             var maxOrder = await db.ServiceLinks.MaxAsync(s => (int?)s.DisplayOrder) ?? 0;
             db.ServiceLinks.Add(new ServiceLink
@@ -30,7 +30,8 @@ namespace GRID.Pages.Admin.Services
                 Description = description,
                 RequiresAuth = requiresAuth,
                 ShowInNav = showInNav,
-                ShowOnHomePage = showOnHomePage,
+                ShowInHero = showInHero,
+                ShowInServices = showInServices,
                 IsActive = true,
                 DisplayOrder = maxOrder + 1
             });
@@ -44,7 +45,7 @@ namespace GRID.Pages.Admin.Services
         }
 
         public async Task<IActionResult> OnPostEditAsync(int id, string name, string token, string url,
-            string? iconClass, string? description, bool requiresAuth, bool isActive, bool showInNav, bool showOnHomePage)
+            string? iconClass, string? description, bool requiresAuth, bool isActive, bool showInNav, bool showInHero, bool showInServices)
         {
             var link = await db.ServiceLinks.FindAsync(id);
             if (link == null) return NotFound();
@@ -57,7 +58,8 @@ namespace GRID.Pages.Admin.Services
             link.RequiresAuth = requiresAuth;
             link.IsActive = isActive;
             link.ShowInNav = showInNav;
-            link.ShowOnHomePage = showOnHomePage;
+            link.ShowInHero = showInHero;
+            link.ShowInServices = showInServices;
             await db.SaveChangesAsync();
 
             var actor = User.Identity?.Name;

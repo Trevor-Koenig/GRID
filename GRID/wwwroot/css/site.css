@@ -400,3 +400,13 @@ html[data-bs-theme="dark"] .auth-bg-overlay {
 .admin-status-dot--down,
 .nav-status-dot--down  { background: #ef4444; }
 .admin-status-dot--unknown { background: #9ca3af; }
+
+/* Mobile nav logout button styled as a plain link */
+.nav-link-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font: inherit;
+    color: inherit;
+}

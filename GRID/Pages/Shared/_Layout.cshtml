@@ -66,8 +66,6 @@
                             <li><a href="/#home" class="active">Home<br></a></li>
                             <li><a href="/#about">About</a></li>
                             <li><a href="/#services">Services</a></li>
-                            <li><a href="/#portfolio">Portfolio</a></li>
-                            <li><a href="/#team">Team</a></li>
                             <li><a href="/#contact">Contact</a></li>
                             <li class="dropdown">
                                 <a href="#"><span>Quick Services</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
@@ -87,27 +85,37 @@
                                             </a>
                                         </li>
                                     }
-                                    @if ((await _authorizationService.AuthorizeAsync(User, null, "AdminOnly")).Succeeded)
-                                    {
-                                    <li class="dropdown">
-                                        <a href="#"><span>Admin</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
-                                        <ul>
-                                            <li><a asp-page="/Admin/Dashboard/Index"><i class="bi bi-speedometer2 me-1"></i>Dashboard</a></li>
-                                            @if ((await _permissionService.UserHasPermissionAsync(User.Claims.Where(c => c.Type == System.Security.Claims.ClaimTypes.Role).Select(c => c.Value), GRID.Models.Permissions.AdminUsers))){ <li><a asp-page="/Admin/Users/Index">Users</a></li> }
-                                            @if ((await _permissionService.UserHasPermissionAsync(User.Claims.Where(c => c.Type == System.Security.Claims.ClaimTypes.Role).Select(c => c.Value), GRID.Models.Permissions.AdminRoles))){ <li><a asp-page="/Admin/Roles/Index">Roles</a></li> <li><a asp-page="/Admin/RolePermissions/Index">Permissions</a></li> }
-                                            @if ((await _permissionService.UserHasPermissionAsync(User.Claims.Where(c => c.Type == System.Security.Claims.ClaimTypes.Role).Select(c => c.Value), GRID.Models.Permissions.AdminInvites))){ <li><a asp-page="/Admin/Invites/Index">Invites</a></li> }
-                                            @if ((await _permissionService.UserHasPermissionAsync(User.Claims.Where(c => c.Type == System.Security.Claims.ClaimTypes.Role).Select(c => c.Value), GRID.Models.Permissions.AdminContacts))){ <li><a asp-page="/Admin/ContactRequests/Index">Contact Requests</a></li> }
-                                            @if ((await _permissionService.UserHasPermissionAsync(User.Claims.Where(c => c.Type == System.Security.Claims.ClaimTypes.Role).Select(c => c.Value), GRID.Models.Permissions.AdminServices))){ <li><a asp-page="/Admin/Services/Index">Services</a></li> }
-                                            @if ((await _permissionService.UserHasPermissionAsync(User.Claims.Where(c => c.Type == System.Security.Claims.ClaimTypes.Role).Select(c => c.Value), GRID.Models.Permissions.AdminAuditLog))){ <li><a asp-page="/Admin/AuditLog/Index">Audit Log</a></li> }
-                                        </ul>
-                                    </li>
-                                    }
                                 </ul>
                             </li>
+                            @if ((await _authorizationService.AuthorizeAsync(User, null, "AdminOnly")).Succeeded)
+                            {
+                            <li class="dropdown">
+                                <a href="#"><span>Admin</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
+                                <ul>
+                                    <li><a asp-page="/Admin/Dashboard/Index">Dashboard</a></li>
+                                    @if ((await _permissionService.UserHasPermissionAsync(User.Claims.Where(c => c.Type == System.Security.Claims.ClaimTypes.Role).Select(c => c.Value), GRID.Models.Permissions.AdminUsers))){ <li><a asp-page="/Admin/Users/Index">Users</a></li> }
+                                    @if ((await _permissionService.UserHasPermissionAsync(User.Claims.Where(c => c.Type == System.Security.Claims.ClaimTypes.Role).Select(c => c.Value), GRID.Models.Permissions.AdminRoles))){ <li><a asp-page="/Admin/Roles/Index">Roles</a></li> <li><a asp-page="/Admin/RolePermissions/Index">Permissions</a></li> }
+                                    @if ((await _permissionService.UserHasPermissionAsync(User.Claims.Where(c => c.Type == System.Security.Claims.ClaimTypes.Role).Select(c => c.Value), GRID.Models.Permissions.AdminInvites))){ <li><a asp-page="/Admin/Invites/Index">Invites</a></li> }
+                                    @if ((await _permissionService.UserHasPermissionAsync(User.Claims.Where(c => c.Type == System.Security.Claims.ClaimTypes.Role).Select(c => c.Value), GRID.Models.Permissions.AdminContacts))){ <li><a asp-page="/Admin/ContactRequests/Index">Contact Requests</a></li> }
+                                    @if ((await _permissionService.UserHasPermissionAsync(User.Claims.Where(c => c.Type == System.Security.Claims.ClaimTypes.Role).Select(c => c.Value), GRID.Models.Permissions.AdminServices))){ <li><a asp-page="/Admin/Services/Index">Services</a></li> }
+                                    @if ((await _permissionService.UserHasPermissionAsync(User.Claims.Where(c => c.Type == System.Security.Claims.ClaimTypes.Role).Select(c => c.Value), GRID.Models.Permissions.AdminAuditLog))){ <li><a asp-page="/Admin/AuditLog/Index">Audit Log</a></li> }
+                                </ul>
+                            </li>
+                            }
                             <li class="d-xl-none my-4"><a></a></li>
-                            <li class="d-xl-none">
-                                <a asp-area="Identity" asp-page="/Account/Login">Log In</a>
+                            @if (User.Identity?.IsAuthenticated == true)
+                            {
+                                <li class="d-xl-none"><a asp-area="Identity" asp-page="/Account/Manage/Index">Account</a></li>
+                                <li class="d-xl-none">
+                                    <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Page("/Index", new { area = "" })">
+                                        <button type="submit" class="nav-link-btn">Log Out</button>
+                                    </form>
                                 </li>
+                            }
+                            else
+                            {
+                                <li class="d-xl-none"><a asp-area="Identity" asp-page="/Account/Login">Log In</a></li>
+                            }
                             <li class="d-xl-none">
                                 <a class="theme-dark-btn light-theme">Dark Mode</a>
                             </li>

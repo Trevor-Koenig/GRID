@@ -12,15 +12,18 @@ namespace GRID.Pages
         public ContactRequest ContactInput { get; set; } = new();
 
         public bool ContactSent { get; set; }
-        public IList<ServiceLink> HomeServices { get; set; } = [];
+        public IList<ServiceLink> HeroServices { get; set; } = [];
+        public IList<ServiceLink> ServicesSection { get; set; } = [];
 
         public async Task OnGetAsync()
         {
             ContactSent = TempData["ContactSent"] as bool? ?? false;
-            HomeServices = await db.ServiceLinks
-                .Where(s => s.IsActive && s.ShowOnHomePage)
+            var active = await db.ServiceLinks
+                .Where(s => s.IsActive)
                 .OrderBy(s => s.DisplayOrder)
                 .ToListAsync();
+            HeroServices = active.Where(s => s.ShowInHero).ToList();
+            ServicesSection = active.Where(s => s.ShowInServices).ToList();
         }
 
         public async Task<IActionResult> OnPostContactAsync()

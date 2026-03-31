@@ -23,7 +23,8 @@ namespace GRID.Models
         public bool RequiresAuth { get; set; } = true;
         public bool IsActive { get; set; } = true;
         public bool ShowInNav { get; set; } = true;
-        public bool ShowOnHomePage { get; set; } = true;
+        public bool ShowInHero { get; set; } = true;
+        public bool ShowInServices { get; set; } = true;
         public int DisplayOrder { get; set; }
     }
 }
