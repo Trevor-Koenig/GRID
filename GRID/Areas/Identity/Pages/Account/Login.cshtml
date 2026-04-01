@@ -34,10 +34,10 @@
                     </label>
                 </div>
                 <button id="login-submit" type="submit" class="w-100 btn btn-lg btn-primary mb-3">Log in</button>
-                <div class="d-flex flex-column gap-1">
-                    <a id="forgot-password" asp-page="./ForgotPassword">Forgot your password?</a>
-                    <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">Register as a new user</a>
-                    <a id="resend-confirmation" asp-page="./ResendEmailConfirmation">Resend email confirmation</a>
+                <div class="d-flex flex-column">
+                    <a id="forgot-password" asp-page="./ForgotPassword" class="d-block py-2 py-sm-1 fs-6 fs-sm-4">Forgot your password?</a>
+                    <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl" class="d-block py-2 py-sm-1 fs-6 fs-sm-4">Register as a new user</a>
+                    <a id="resend-confirmation" asp-page="./ResendEmailConfirmation" class="d-block py-2 py-sm-1 fs-6 fs-sm-4">Resend email confirmation</a>
                 </div>
             </form>
         </div>

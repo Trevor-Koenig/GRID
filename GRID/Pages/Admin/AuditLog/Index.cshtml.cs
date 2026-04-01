@@ -21,11 +21,11 @@ namespace GRID.Pages.Admin.AuditLog
         public string? Search { get; set; }
 
         [BindProperty(SupportsGet = true)]
-        public int Page { get; set; } = 1;
+        public int CurrentPage { get; set; } = 1;
 
         public async Task OnGetAsync()
         {
-            if (Page < 1) Page = 1;
+            if (CurrentPage < 1) CurrentPage = 1;
 
             var query = db.AuditLogs.AsQueryable();
 
@@ -48,7 +48,7 @@ namespace GRID.Pages.Admin.AuditLog
 
             Logs = await query
                 .OrderByDescending(l => l.Timestamp)
-                .Skip((Page - 1) * PageSize)
+                .Skip((CurrentPage - 1) * PageSize)
                 .Take(PageSize)
                 .ToListAsync();
         }

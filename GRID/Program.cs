@@ -115,6 +115,18 @@ builder.Services.AddHostedService<ContactRequestReminderService>();
 
 builder.Services.AddRateLimiter(options =>
 {
+    if (builder.Environment.IsDevelopment())
+    {
+        // Disable all rate limiting in development so it never gets in the way.
+        options.GlobalLimiter = System.Threading.RateLimiting.PartitionedRateLimiter.Create<HttpContext, string>(
+            _ => System.Threading.RateLimiting.RateLimitPartition.GetNoLimiter("dev"));
+
+        foreach (var policy in new[] { "InviteLimiter", "LoginLimiter", "ContactLimiter", "ApiLimiter" })
+            options.AddPolicy(policy, _ => System.Threading.RateLimiting.RateLimitPartition.GetNoLimiter("dev"));
+
+        return;
+    }
+
     options.RejectionStatusCode = 429;
     options.OnRejected = async (ctx, token) =>
     {
@@ -133,10 +145,10 @@ builder.Services.AddRateLimiter(options =>
                 QueueLimit = 0
             }));
 
-    // Invite redemption: 10/min per IP (existing)
+    // Invite redemption: 60/min per IP
     options.AddFixedWindowLimiter("InviteLimiter", opt =>
     {
-        opt.PermitLimit = 10;
+        opt.PermitLimit = 60;
         opt.Window = TimeSpan.FromMinutes(1);
         opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
         opt.QueueLimit = 2;
