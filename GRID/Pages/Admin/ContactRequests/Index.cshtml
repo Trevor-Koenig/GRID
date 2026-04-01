@@ -71,7 +71,9 @@
                                             <td class="align-middle text-muted" style="font-size:0.875rem;">@item.Email</td>
                                             <td class="align-middle">@item.Subject</td>
                                             <td class="align-middle text-muted" style="font-size:0.875rem;">
-                                                @item.SubmittedAt.ToLocalTime().ToString("MMM d, yyyy h:mm tt")
+                                                <time class="local-time" datetime="@item.SubmittedAt.ToUniversalTime().ToString("o")">
+                                                    @item.SubmittedAt.ToUniversalTime().ToString("MMM d, yyyy HH:mm") UTC
+                                                </time>
                                             </td>
                                             <td class="align-middle">
                                                 @if (item.IsResponded)
@@ -228,6 +230,14 @@
 
 @section Scripts {
     <script>
+        document.querySelectorAll('time.local-time').forEach(el => {
+            const date = new Date(el.getAttribute('datetime'));
+            el.textContent = date.toLocaleString(undefined, {
+                month: 'short', day: 'numeric', year: 'numeric',
+                hour: 'numeric', minute: '2-digit'
+            });
+        });
+
         document.getElementById('viewMessageModal').addEventListener('show.bs.modal', function (e) {
             const b = e.relatedTarget;
             document.getElementById('modalSubject').textContent = b.dataset.requestSubject;
