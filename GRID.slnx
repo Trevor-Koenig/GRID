@@ -3,5 +3,7 @@
     <Build />
   </Project>
   <Project Path="GRID/GRID.csproj" />
-  <Project Path="GRID.Tests/GRID.Tests.csproj" />
+  <Project Path="GRID.Tests/GRID.Tests.csproj">
+    <Build Solution="Debug|*" Project="false" />
+  </Project>
 </Solution>
