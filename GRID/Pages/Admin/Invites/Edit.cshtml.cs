@@ -41,7 +41,18 @@ namespace GRID.Pages.Admin.Invites
                 return Page();
             }
 
-            context.Attach(Invite).State = EntityState.Modified;
+            var invite = await context.Invites.FindAsync(Invite.Id);
+            if (invite == null)
+                return NotFound();
+
+            invite.Code = Invite.Code;
+            invite.Role = Invite.Role;
+            invite.IsSingleUse = Invite.IsSingleUse;
+            invite.MaxUses = Invite.MaxUses;
+            invite.CurrentUses = Invite.CurrentUses;
+            invite.Email = Invite.Email;
+            invite.IsActive = Invite.IsActive;
+            invite.ExpiresAt = Invite.ExpiresAt;
 
             try
             {
@@ -50,13 +61,8 @@ namespace GRID.Pages.Admin.Invites
             catch (DbUpdateConcurrencyException)
             {
                 if (!InviteExists(Invite.Id))
-                {
                     return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                throw;
             }
 
             return RedirectToPage("./Index");
