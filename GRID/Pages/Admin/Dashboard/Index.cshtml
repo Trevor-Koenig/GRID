@@ -72,7 +72,7 @@
                             @foreach (var day in Model.PageViewChart)
                             {
                                 var barHeight = (int)(day.Count * 80.0 / maxCount);
-                                var isToday = day.Date.Date == DateTime.UtcNow.Date;
+                                var isToday = day.Date.Date == Model.LocalToday;
                                 <div class="flex-fill d-flex flex-column align-items-center justify-content-end" style="min-width:0;"
                                      title="@day.Date.ToString("MMM d"): @day.Count view@(day.Count == 1 ? "" : "s")">
                                     <div style="width:100%;height:@(barHeight)px;background:@(isToday ? "var(--accent-color)" : "color-mix(in srgb,var(--accent-color) 50%,transparent)");border-radius:3px 3px 0 0;min-height:@(day.Count > 0 ? "3" : "0")px;"></div>
@@ -82,7 +82,7 @@
                         <div class="d-flex gap-1 mt-1">
                             @foreach (var day in Model.PageViewChart)
                             {
-                                var isToday = day.Date.Date == DateTime.UtcNow.Date;
+                                var isToday = day.Date.Date == Model.LocalToday;
                                 <div class="flex-fill text-center text-muted" style="font-size:0.65rem;min-width:0;overflow:hidden;">
                                     @(isToday ? "Today" : day.Date.ToString("M/d"))
                                 </div>
@@ -215,6 +215,18 @@
 
 @section Scripts {
     <script>
+        // Ensure the page is loaded with the client's timezone offset so the
+        // server can bucket page views into the correct local days.
+        // getTimezoneOffset() returns minutes behind UTC (e.g. UTC-8 → 480).
+        (function () {
+            var tz = new Date().getTimezoneOffset();
+            var params = new URLSearchParams(window.location.search);
+            if (parseInt(params.get('tzOffset') ?? 'x') !== tz) {
+                params.set('tzOffset', tz);
+                window.location.replace(window.location.pathname + '?' + params.toString());
+            }
+        })();
+
         document.querySelectorAll('[data-utc]').forEach(function (el) {
             var d = new Date(el.dataset.utc);
             el.textContent = d.toLocaleString(undefined, {

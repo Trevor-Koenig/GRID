@@ -17,6 +17,16 @@ namespace GRID.Pages.Admin.Dashboard
         public IList<RecentActivity> RecentAuditLogs { get; set; } = [];
         public IList<DayCount> PageViewChart { get; set; } = [];
 
+        /// <summary>
+        /// Minutes behind UTC — matches JavaScript's Date.getTimezoneOffset().
+        /// e.g. UTC-8 = 480, UTC+1 = -60.
+        /// </summary>
+        [Microsoft.AspNetCore.Mvc.BindProperty(SupportsGet = true)]
+        public int TzOffset { get; set; } = 0;
+
+        /// <summary>"Today" in the client's local timezone.</summary>
+        public DateTime LocalToday { get; set; }
+
         public async Task OnGetAsync()
         {
             TotalUsers = await db.Users.CountAsync();
@@ -31,19 +41,23 @@ namespace GRID.Pages.Admin.Dashboard
 
             ActiveServices = await db.ServiceLinks.CountAsync(s => s.IsActive);
 
-            var chartStart = DateTime.SpecifyKind(DateTime.UtcNow.Date.AddDays(-13), DateTimeKind.Utc);
-            var rawCounts = await db.AuditLogs
-                .Where(l => l.Action == "PageView" && l.Timestamp >= chartStart)
-                .GroupBy(l => new { l.Timestamp.Year, l.Timestamp.Month, l.Timestamp.Day })
-                .Select(g => new { g.Key.Year, g.Key.Month, g.Key.Day, Count = g.Count() })
+            // Derive the client's local "today" from the timezone offset.
+            LocalToday = DateTime.UtcNow.AddMinutes(-TzOffset).Date;
+            var chartLocalStart = LocalToday.AddDays(-13);
+
+            // Fetch with a 1-day UTC buffer so no edge-of-day views are missed.
+            var queryUtcStart = DateTime.SpecifyKind(chartLocalStart.AddDays(-1), DateTimeKind.Utc);
+            var rawTimestamps = await db.AuditLogs
+                .Where(l => l.Action == "PageView" && l.Timestamp >= queryUtcStart)
+                .Select(l => l.Timestamp)
                 .ToListAsync();
 
             PageViewChart = Enumerable.Range(0, 14)
-                .Select(i => chartStart.AddDays(i))
+                .Select(i => chartLocalStart.AddDays(i))
                 .Select(d => new DayCount
                 {
                     Date = d,
-                    Count = rawCounts.FirstOrDefault(r => r.Year == d.Year && r.Month == d.Month && r.Day == d.Day)?.Count ?? 0
+                    Count = rawTimestamps.Count(t => t.AddMinutes(-TzOffset).Date == d.Date)
                 })
                 .ToList();
 
