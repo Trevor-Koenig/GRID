@@ -119,15 +119,20 @@
             }
             catch (DbUpdateConcurrencyException ex)
             {
-                // Handle the concurrency conflict
-                // You can inspect which entities failed:
                 foreach (var entry in ex.Entries)
                 {
-                    if (entry.Entity is Invite inv)
-                    {
-                        // Option 1: Reload current values from DB
+                    if (entry.Entity is Invite)
                         await entry.ReloadAsync();
-                    }
+                }
+
+                // Retry once after reloading the fresh RowVersion
+                try
+                {
+                    await db.SaveChangesAsync();
+                }
+                catch
+                {
+                    return (false, null);
                 }
             }
 
