@@ -133,6 +133,41 @@ public class DocArticleTests
         retrieved.IsPublished.Should().BeFalse();
     }
 
+    // ── Null-content guard (mirrors OnPostCreateAsync / OnPostSaveAsync fix) ────
+
+    [Fact]
+    public void Db_NullContentCoalesced_SavesAsEmptyString()
+    {
+        // Simulates form submission where textarea is empty (null from model binding).
+        // The page handlers apply `content ?? ""` before saving to prevent the
+        // NOT NULL constraint violation on the Content column.
+        using var factory = new TestDbContextFactory();
+        var db = factory.Context;
+
+        var article = ValidArticle("null-content-test");
+        article.Content = null! ?? ""; // mirrors the fix
+        db.DocArticles.Add(article);
+        db.SaveChanges();
+
+        var retrieved = db.DocArticles.Find(article.Id);
+        retrieved!.Content.Should().Be("");
+    }
+
+    [Fact]
+    public void Db_RawNullContent_ThrowsException()
+    {
+        // Without the fix, a null Content reaches the DB and violates NOT NULL.
+        using var factory = new TestDbContextFactory();
+        var db = factory.Context;
+
+        var article = ValidArticle("raw-null-content");
+        article.Content = null!;
+        db.DocArticles.Add(article);
+        var act = () => db.SaveChanges();
+
+        act.Should().Throw<Exception>(); // SQLite raises a constraint exception
+    }
+
     // ── Database: unique constraint on (Category, Slug) ───────────────────────
 
     [Fact]

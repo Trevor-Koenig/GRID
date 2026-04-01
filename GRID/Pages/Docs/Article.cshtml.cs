@@ -65,7 +65,7 @@ namespace GRID.Pages.Docs
             article.Title = title;
             article.Slug = slug.ToLower();
             article.Category = category;
-            article.Content = content;
+            article.Content = content ?? "";
             article.ServiceToken = string.IsNullOrWhiteSpace(serviceToken) ? null : serviceToken;
             article.IsPublished = isPublished;
             article.IsPublic = isPublic;
