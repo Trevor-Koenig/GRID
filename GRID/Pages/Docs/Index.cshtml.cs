@@ -44,7 +44,7 @@ namespace GRID.Pages.Docs
                 Title = title,
                 Slug = slug.ToLower(),
                 Category = category,
-                Content = content,
+                Content = content ?? "",
                 ServiceToken = string.IsNullOrWhiteSpace(serviceToken) ? null : serviceToken,
                 IsPublished = isPublished,
                 IsPublic = isPublic,
