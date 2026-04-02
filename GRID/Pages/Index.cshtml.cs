@@ -1,5 +1,6 @@
 using GRID.Data;
 using GRID.Models;
+using GRID.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.RateLimiting;
@@ -7,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GRID.Pages
 {
-    public class IndexModel(ApplicationDbContext db) : PageModel
+    public class IndexModel(ApplicationDbContext db, IServiceStatusService serviceStatus) : PageModel
     {
         [BindProperty]
         public ContactRequest ContactInput { get; set; } = new();
@@ -15,6 +16,8 @@ namespace GRID.Pages
         public bool ContactSent { get; set; }
         public IList<ServiceLink> HeroServices { get; set; } = [];
         public IList<ServiceLink> ServicesSection { get; set; } = [];
+
+        public ServiceStatus? GetServiceStatus(string token) => serviceStatus.GetStatus(token);
 
         public async Task OnGetAsync()
         {

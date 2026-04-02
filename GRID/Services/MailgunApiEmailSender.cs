@@ -5,17 +5,16 @@ namespace GRID.Services
     using System.Net.Http.Headers;
     using System.Text;
 
-    public class MailgunApiEmailSender(HttpClient httpClient, IConfiguration config) : IExtendedEmailSender
+    public class MailgunApiEmailSender(IHttpClientFactory httpClientFactory, IConfiguration config) : IExtendedEmailSender
     {
-        private readonly HttpClient _httpClient = httpClient;
-        private readonly IConfiguration _config = config;
-
         public Task SendEmailAsync(string email, string subject, string htmlMessage)
             => SendEmailAsync(email, subject, htmlMessage, replyTo: null);
 
         public async Task SendEmailAsync(string email, string subject, string htmlMessage, string? replyTo)
         {
-            var mailgun = _config.GetSection("Mailgun");
+            var mailgun = config.GetSection("Mailgun");
+
+            using var httpClient = httpClientFactory.CreateClient();
 
             var request = new HttpRequestMessage(
                 HttpMethod.Post,
@@ -42,7 +41,7 @@ namespace GRID.Services
 
             request.Content = new FormUrlEncodedContent(fields);
 
-            var response = await _httpClient.SendAsync(request);
+            var response = await httpClient.SendAsync(request);
             response.EnsureSuccessStatusCode();
         }
     }
