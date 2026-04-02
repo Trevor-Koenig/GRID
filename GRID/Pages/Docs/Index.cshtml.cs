@@ -10,7 +10,9 @@ namespace GRID.Pages.Docs
 {
     public class IndexModel(ApplicationDbContext db, IAuthorizationService auth, AuditService audit) : PageModel
     {
-        public List<IGrouping<string, DocArticle>> GroupedArticles { get; set; } = [];
+        public record DocCategoryGroup(string Name, List<DocArticle> Articles);
+
+        public List<DocCategoryGroup> GroupedArticles { get; set; } = [];
         public bool CanViewPrivate { get; set; }
         public bool IsAdmin { get; set; }
 
@@ -23,12 +25,23 @@ namespace GRID.Pages.Docs
             if (!IsAdmin) query = query.Where(d => d.IsPublished);
             if (!CanViewPrivate) query = query.Where(d => d.IsPublic);
 
-            GroupedArticles = await query
-                .OrderBy(d => d.Category)
-                .ThenBy(d => d.DisplayOrder)
+            var articles = await query
+                .OrderBy(d => d.DisplayOrder)
                 .ThenBy(d => d.Title)
-                .GroupBy(d => d.Category)
                 .ToListAsync();
+
+            var grouped = new Dictionary<string, List<DocArticle>>(StringComparer.OrdinalIgnoreCase);
+            foreach (var article in articles)
+            {
+                var key = article.Category.Trim().ToLower();
+                if (!grouped.TryGetValue(key, out var bucket))
+                    grouped[key] = bucket = new List<DocArticle>();
+                bucket.Add(article);
+            }
+            GroupedArticles = grouped
+                .OrderBy(kv => kv.Key)
+                .Select(kv => new DocCategoryGroup(kv.Key, kv.Value))
+                .ToList();
         }
 
         public async Task<IActionResult> OnPostCreateAsync(
@@ -43,7 +56,7 @@ namespace GRID.Pages.Docs
             {
                 Title = title,
                 Slug = slug.ToLower(),
-                Category = category,
+                Category = category.Trim().ToLower(),
                 Content = content ?? "",
                 ServiceToken = string.IsNullOrWhiteSpace(serviceToken) ? null : serviceToken,
                 IsPublished = isPublished,

@@ -97,6 +97,7 @@ builder.Services.AddScoped<AuditService>();
 // permission service
 builder.Services.AddSingleton<PermissionService>();
 builder.Services.AddSingleton<IAuthorizationHandler, PermissionHandler>();
+builder.Services.AddSingleton<IAuthorizationMiddlewareResultHandler, AdminNotFoundHandler>();
 
 // service status checker (singleton background service)
 builder.Services.AddSingleton<ServiceStatusService>();
@@ -223,10 +224,10 @@ app.Use(async (context, next) =>
     headers["X-XSS-Protection"] = "0";
     headers["Content-Security-Policy"] =
         "default-src 'self'; " +
-        "script-src 'self' 'unsafe-inline'; " +
-        "style-src 'self' 'unsafe-inline'; " +
+        "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; " +
+        "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; " +
         "img-src 'self' data:; " +
-        "font-src 'self' data:; " +
+        "font-src 'self' data: https://cdn.jsdelivr.net; " +
         "connect-src 'self'; " +
         "frame-ancestors 'none'; " +
         "form-action 'self'; " +
@@ -245,6 +246,10 @@ else
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+
+// Intercept 404 responses and show the NotFound page (covers both missing routes
+// and admin pages blocked by AdminNotFoundHandler).
+app.UseStatusCodePagesWithReExecute("/NotFound");
 
 app.UseHttpsRedirection();
 

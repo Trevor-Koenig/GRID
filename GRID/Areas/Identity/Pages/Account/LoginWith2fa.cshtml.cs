@@ -5,6 +5,8 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
+using GRID.Data;
+using GRID.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -18,15 +20,18 @@ namespace GRID.Areas.Identity.Pages.Account
     {
         private readonly SignInManager<IdentityUser> _signInManager;
         private readonly UserManager<IdentityUser> _userManager;
+        private readonly ApplicationDbContext _db;
         private readonly ILogger<LoginWith2faModel> _logger;
 
         public LoginWith2faModel(
             SignInManager<IdentityUser> signInManager,
             UserManager<IdentityUser> userManager,
+            ApplicationDbContext db,
             ILogger<LoginWith2faModel> logger)
         {
             _signInManager = signInManager;
             _userManager = userManager;
+            _db = db;
             _logger = logger;
         }
 
@@ -110,6 +115,9 @@ namespace GRID.Areas.Identity.Pages.Account
 
             var userId = await _userManager.GetUserIdAsync(user);
 
+            var rawIp = HttpContext.Connection.RemoteIpAddress;
+            var ip = rawIp?.IsIPv4MappedToIPv6 == true ? rawIp.MapToIPv4().ToString() : rawIp?.ToString();
+
             if (result.Succeeded)
             {
                 _logger.LogInformation("User with ID '{UserId}' logged in with 2fa.", user.Id);
@@ -118,11 +126,29 @@ namespace GRID.Areas.Identity.Pages.Account
             else if (result.IsLockedOut)
             {
                 _logger.LogWarning("User with ID '{UserId}' account locked out.", user.Id);
+                _db.AuditLogs.Add(new AuditLog
+                {
+                    Action = "Failed2FA",
+                    ActorId = userId,
+                    ActorEmail = user.Email,
+                    IpAddress = ip,
+                    Details = "Account locked out after failed 2FA"
+                });
+                await _db.SaveChangesAsync();
                 return RedirectToPage("./Lockout");
             }
             else
             {
                 _logger.LogWarning("Invalid authenticator code entered for user with ID '{UserId}'.", user.Id);
+                _db.AuditLogs.Add(new AuditLog
+                {
+                    Action = "Failed2FA",
+                    ActorId = userId,
+                    ActorEmail = user.Email,
+                    IpAddress = ip,
+                    Details = "Invalid authenticator code"
+                });
+                await _db.SaveChangesAsync();
                 ModelState.AddModelError(string.Empty, "Invalid authenticator code.");
                 return Page();
             }

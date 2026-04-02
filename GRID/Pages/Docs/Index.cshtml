@@ -30,9 +30,9 @@
                         @foreach (var group in Model.GroupedArticles)
                         {
                             <div class="mb-3">
-                                <div class="fw-semibold px-2 py-1" style="font-size:0.8rem;text-transform:uppercase;letter-spacing:.05em;opacity:.6;">@group.Key</div>
+                                <div class="fw-semibold px-2 py-1" style="font-size:0.8rem;text-transform:uppercase;letter-spacing:.05em;opacity:.6;">@group.Name</div>
                                 <ul class="list-unstyled mb-0">
-                                    @foreach (var article in group)
+                                    @foreach (var article in group.Articles)
                                     {
                                         <li class="d-flex align-items-center">
                                             <a asp-page="/Docs/Article"
@@ -77,9 +77,9 @@
                     @foreach (var group in Model.GroupedArticles)
                     {
                         <div class="mb-4">
-                            <h4 class="mb-3">@group.Key</h4>
+                            <h4 class="mb-3">@group.Name</h4>
                             <div class="row gy-3">
-                                @foreach (var article in group)
+                                @foreach (var article in group.Articles)
                                 {
                                     <div class="col-md-6">
                                         <div class="admin-panel-card h-100 docs-card @(!article.IsPublished ? "opacity-50" : "")">
@@ -156,7 +156,8 @@
                             </div>
                             <div class="col-md-3">
                                 <div class="form-floating">
-                                    <input type="text" class="form-control" id="createCategory" name="category" placeholder="Category" required />
+                                    <input type="text" class="form-control" id="createCategory" name="category"
+                                           placeholder="Category" required list="categoryList" autocomplete="off" />
                                     <label for="createCategory">Category</label>
                                 </div>
                             </div>
@@ -220,6 +221,13 @@
             </div>
         </div>
     </div>
+
+    <datalist id="categoryList">
+        @foreach (var group in Model.GroupedArticles)
+        {
+            <option value="@group.Name"></option>
+        }
+    </datalist>
 
     @section Scripts {
         <script>
