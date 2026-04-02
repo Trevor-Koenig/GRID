@@ -125,7 +125,7 @@ namespace GRID.Areas.Identity.Pages.Account
         }
 
 
-        public async Task OnGetAsync(string returnUrl = null, string? inviteCode = null)
+        public async Task OnGetAsync(string returnUrl = null, string inviteCode = null)
         {
             ReturnUrl = returnUrl;
             if (!string.IsNullOrWhiteSpace(inviteCode))

@@ -16,6 +16,12 @@ namespace GRID.Middleware
         {
             await next(context);
 
+            // Skip logging for status-code re-executions (e.g. /NotFound rendered by
+            // UseStatusCodePagesWithReExecute). The original request is either already
+            // logged above or is an admin 404 that intentionally produces no log entry.
+            if (context.Features.Get<Microsoft.AspNetCore.Diagnostics.IStatusCodeReExecuteFeature>() != null)
+                return;
+
             var path = context.Request.Path.Value ?? "";
 
             // Skip static assets

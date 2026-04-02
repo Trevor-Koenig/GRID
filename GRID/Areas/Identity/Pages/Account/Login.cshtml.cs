@@ -170,6 +170,19 @@ namespace GRID.Areas.Identity.Pages.Account
                     await _db.SaveChangesAsync();
                     return RedirectToPage("./Lockout");
                 }
+                else if (result.IsNotAllowed && user != null && !await _userManager.IsEmailConfirmedAsync(user))
+                {
+                    _db.AuditLogs.Add(new AuditLog
+                    {
+                        Action = "FailedLogin",
+                        ActorEmail = Input.Email,
+                        IpAddress = ip,
+                        Details = "Email not confirmed"
+                    });
+                    await _db.SaveChangesAsync();
+                    ModelState.AddModelError(string.Empty, "You must confirm your email before logging in. Check your inbox, or use the \"Resend email confirmation\" link below.");
+                    return Page();
+                }
                 else
                 {
                     _db.AuditLogs.Add(new AuditLog
