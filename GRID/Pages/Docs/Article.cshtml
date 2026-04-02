@@ -2,7 +2,65 @@
 @model GRID.Pages.Docs.ArticleModel
 @{
     ViewData["Title"] = Model.EditMode ? $"Editing: {Model.Article.Title}" : Model.Article.Title;
-    var sidebarGroups = Model.SidebarArticles.GroupBy(a => a.Category).OrderBy(g => g.Key);
+    var sidebarDict = new Dictionary<string, List<GRID.Models.DocArticle>>(StringComparer.OrdinalIgnoreCase);
+    foreach (var a in Model.SidebarArticles)
+    {
+        var key = a.Category.Trim().ToLower();
+        if (!sidebarDict.ContainsKey(key)) sidebarDict[key] = new();
+        sidebarDict[key].Add(a);
+    }
+    var sidebarGroups = sidebarDict.OrderBy(kv => kv.Key);
+}
+
+@if (Model.EditMode)
+{
+    @section Styles {
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css" />
+        <style>
+            /* Theme EasyMDE to match the site's CSS variables */
+            .EasyMDEContainer .CodeMirror {
+                background: var(--background-color);
+                color: var(--default-color);
+                border-color: color-mix(in srgb, var(--default-color) 15%, transparent);
+                font-family: var(--bs-font-monospace);
+                font-size: 0.9rem;
+                min-height: 500px;
+            }
+            .EasyMDEContainer .editor-toolbar {
+                background: color-mix(in srgb, var(--default-color) 5%, var(--background-color));
+                border-color: color-mix(in srgb, var(--default-color) 15%, transparent);
+            }
+            .EasyMDEContainer .editor-toolbar button {
+                color: var(--default-color) !important;
+            }
+            .EasyMDEContainer .editor-toolbar button.active,
+            .EasyMDEContainer .editor-toolbar button:hover {
+                background: color-mix(in srgb, var(--default-color) 12%, transparent);
+                border-color: color-mix(in srgb, var(--default-color) 25%, transparent);
+            }
+            .EasyMDEContainer .editor-toolbar i.separator {
+                border-color: color-mix(in srgb, var(--default-color) 20%, transparent);
+            }
+            .EasyMDEContainer .CodeMirror-cursor {
+                border-left-color: var(--default-color);
+            }
+            .EasyMDEContainer .CodeMirror-selected { background: color-mix(in srgb, var(--accent-color) 30%, transparent); }
+            .EasyMDEContainer .editor-preview,
+            .EasyMDEContainer .editor-preview-side {
+                background: var(--background-color);
+                color: var(--default-color);
+                border-color: color-mix(in srgb, var(--default-color) 15%, transparent);
+            }
+            .EasyMDEContainer .editor-statusbar {
+                color: color-mix(in srgb, var(--default-color) 55%, transparent);
+            }
+            /* Remove double border with the panel card */
+            .EasyMDEContainer { border: none; }
+            .EasyMDEContainer .CodeMirror { border-left: none; border-right: none; border-bottom: none; border-radius: 0; }
+            .EasyMDEContainer .editor-toolbar { border-left: none; border-right: none; border-top: none; border-radius: 0; }
+            .EasyMDEContainer .editor-statusbar { padding: 6px 16px; }
+        </style>
+    }
 }
 
 <section class="section">
@@ -25,7 +83,7 @@
                             <div class="mb-3">
                                 <div class="fw-semibold px-2 py-1" style="font-size:0.8rem;text-transform:uppercase;letter-spacing:.05em;opacity:.6;">@group.Key</div>
                                 <ul class="list-unstyled mb-0">
-                                    @foreach (var article in group)
+                                    @foreach (var article in group.Value)
                                     {
                                         var isActive = article.Id == Model.Article.Id;
                                         <li>
@@ -89,7 +147,9 @@
                                     </div>
                                     <div class="col-md-3">
                                         <div class="form-floating">
-                                            <input type="text" class="form-control" id="editCategory" name="category" value="@Model.Article.Category" placeholder="Category" required />
+                                            <input type="text" class="form-control" id="editCategory" name="category"
+                                                   value="@Model.Article.Category" placeholder="Category" required
+                                                   list="categoryList" autocomplete="off" />
                                             <label for="editCategory">Category</label>
                                         </div>
                                     </div>
@@ -125,28 +185,20 @@
                             </div>
                         </div>
 
-                        <!-- Editor and preview side by side -->
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <div class="admin-panel-card h-100">
-                                    <div class="admin-panel-header"><span>Markdown</span></div>
-                                    <div class="p-2">
-                                        <textarea class="form-control font-monospace docs-editor" name="content" rows="30">@Model.Article.Content</textarea>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="admin-panel-card h-100">
-                                    <div class="admin-panel-header">
-                                        <span>Preview</span>
-                                        <span class="text-muted" style="font-size:0.75rem;">Save to refresh</span>
-                                    </div>
-                                    <div class="p-4 docs-content">
-                                        @Html.Raw(Model.RenderedContent)
-                                    </div>
-                                </div>
+                        <!-- Rich text editor -->
+                        <div class="admin-panel-card">
+                            <div class="admin-panel-header"><span>Content</span></div>
+                            <div class="p-0">
+                                <textarea id="contentEditor" name="content">@Model.Article.Content</textarea>
                             </div>
                         </div>
+
+                        <datalist id="categoryList">
+                            @foreach (var cat in sidebarDict.Keys.OrderBy(k => k))
+                            {
+                                <option value="@cat"></option>
+                            }
+                        </datalist>
 
                         <div class="d-flex justify-content-end gap-2 mt-3">
                             <a asp-page="/Docs/Article"
@@ -200,3 +252,27 @@
         </div>
     </div>
 </section>
+
+@if (Model.EditMode)
+{
+    @section Scripts {
+        <script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
+        <script>
+            var easyMDE = new EasyMDE({
+                element: document.getElementById('contentEditor'),
+                spellChecker: false,
+                autosave: { enabled: false },
+                status: ['lines', 'words'],
+                toolbar: [
+                    'bold', 'italic', 'strikethrough', 'heading', '|',
+                    'quote', 'unordered-list', 'ordered-list', '|',
+                    'link', 'image', 'table', 'code', 'horizontal-rule', '|',
+                    'preview', 'side-by-side', 'fullscreen', '|',
+                    'undo', 'redo', 'guide'
+                ],
+                previewClass: ['docs-content'],
+                renderingConfig: { singleLineBreaks: false }
+            });
+        </script>
+    }
+}
