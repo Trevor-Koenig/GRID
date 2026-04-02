@@ -198,7 +198,7 @@ builder.Services.AddRateLimiter(options =>
  **********************************/
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
-    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost;
     // Clear both lists so any upstream proxy (Docker bridge, reverse proxy) is trusted
     options.KnownIPNetworks.Clear();
     options.KnownProxies.Clear();
