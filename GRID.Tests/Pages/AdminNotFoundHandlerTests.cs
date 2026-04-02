@@ -111,6 +111,51 @@ public class AdminNotFoundHandlerTests
         ctx.Response.StatusCode.Should().NotBe(StatusCodes.Status404NotFound);
     }
 
+    // ── Response body ─────────────────────────────────────────────────────────
+    // UseStatusCodePagesWithReExecute only intercepts when the response body has NOT
+    // been started. The handler must set the status code and return without writing
+    // any body so the middleware can re-execute /NotFound (where the global rate
+    // limiter skips the re-execution slot via IStatusCodeReExecuteFeature).
+
+    [Theory]
+    [InlineData("/Admin")]
+    [InlineData("/Admin/Dashboard")]
+    [InlineData("/Admin/Users/Delete")]
+    public async Task AdminPath_WhenChallenged_WritesNoResponseBody(string path)
+    {
+        var ctx = CreateContext(path);
+        ctx.Response.Body = new System.IO.MemoryStream();
+
+        await CreateHandler().HandleAsync(
+            _ => Task.CompletedTask,
+            ctx,
+            AnyPolicy(),
+            PolicyAuthorizationResult.Challenge());
+
+        ctx.Response.StatusCode.Should().Be(StatusCodes.Status404NotFound);
+        ctx.Response.Body.Length.Should().Be(0,
+            "an empty body lets UseStatusCodePagesWithReExecute intercept and render /NotFound");
+    }
+
+    [Theory]
+    [InlineData("/Admin")]
+    [InlineData("/Admin/Roles")]
+    public async Task AdminPath_WhenForbidden_WritesNoResponseBody(string path)
+    {
+        var ctx = CreateContext(path);
+        ctx.Response.Body = new System.IO.MemoryStream();
+
+        await CreateHandler().HandleAsync(
+            _ => Task.CompletedTask,
+            ctx,
+            AnyPolicy(),
+            PolicyAuthorizationResult.Forbid());
+
+        ctx.Response.StatusCode.Should().Be(StatusCodes.Status404NotFound);
+        ctx.Response.Body.Length.Should().Be(0,
+            "an empty body lets UseStatusCodePagesWithReExecute intercept and render /NotFound");
+    }
+
     // ── Path segment boundary ─────────────────────────────────────────────────
 
     [Theory]

@@ -135,16 +135,23 @@ builder.Services.AddRateLimiter(options =>
         await ctx.HttpContext.Response.WriteAsync("Too many requests. Please try again later.", token);
     };
 
-    // Global safety net: 300 req/min per IP
+    // Global safety net: 300 req/min per IP.
+    // Status-code re-executions (e.g. /NotFound rendered by UseStatusCodePagesWithReExecute)
+    // must not consume a second slot — the original request was already counted.
     options.GlobalLimiter = System.Threading.RateLimiting.PartitionedRateLimiter.Create<HttpContext, string>(ctx =>
-        System.Threading.RateLimiting.RateLimitPartition.GetFixedWindowLimiter(
+    {
+        if (ctx.Features.Get<Microsoft.AspNetCore.Diagnostics.IStatusCodeReExecuteFeature>() != null)
+            return System.Threading.RateLimiting.RateLimitPartition.GetNoLimiter("reexecute");
+
+        return System.Threading.RateLimiting.RateLimitPartition.GetFixedWindowLimiter(
             ctx.Connection.RemoteIpAddress?.ToString() ?? "unknown",
             _ => new System.Threading.RateLimiting.FixedWindowRateLimiterOptions
             {
                 PermitLimit = 300,
                 Window = TimeSpan.FromMinutes(1),
                 QueueLimit = 0
-            }));
+            });
+    });
 
     // Invite redemption: 60/min per IP
     options.AddFixedWindowLimiter("InviteLimiter", opt =>
