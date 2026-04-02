@@ -50,7 +50,7 @@ namespace GRID.Services
             if (!response.IsSuccessStatusCode)
             {
                 var body = await response.Content.ReadAsStringAsync();
-                logger.LogError("Mailgun returned {StatusCode}: {Body}", (int)response.StatusCode, body);
+                logger.LogCritical("Mailgun returned {StatusCode}: {Body}", (int)response.StatusCode, body);
             }
 
             response.EnsureSuccessStatusCode();

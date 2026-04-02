@@ -218,6 +218,12 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
  **********************************/
 var app = builder.Build();
 
+// Mirror Critical log entries into the audit log so production incidents are
+// visible in the admin panel without needing Docker/server log access.
+app.Services.GetRequiredService<ILoggerFactory>()
+    .AddProvider(new GRID.Services.CriticalErrorAuditLoggerProvider(
+        app.Services.GetRequiredService<IServiceScopeFactory>()));
+
 // Must be first — rewrites RemoteIpAddress from X-Forwarded-For before any other middleware reads it
 app.UseForwardedHeaders();
 
