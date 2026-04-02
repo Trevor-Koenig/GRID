@@ -24,6 +24,13 @@
                         <span>@TempData["SuccessMessage"]</span>
                     </div>
                 }
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-danger d-flex align-items-center gap-2 mb-3">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                        <span>@TempData["ErrorMessage"]</span>
+                    </div>
+                }
 
                 <div class="admin-panel-card">
                     <div class="admin-panel-header">

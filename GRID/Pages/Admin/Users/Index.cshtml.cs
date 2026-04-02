@@ -13,7 +13,8 @@ namespace GRID.Pages.Admin.Users
         RoleManager<IdentityRole> roleManager,
         ApplicationDbContext db,
         IEmailSender emailSender,
-        AuditService audit) : PageModel
+        AuditService audit,
+        ILogger<IndexModel> logger) : PageModel
     {
         public IList<UserRoleViewModel> Users { get; set; } = [];
         public IList<string> AvailableRoles { get; set; } = [];
@@ -114,8 +115,25 @@ namespace GRID.Pages.Admin.Users
                 values: new { area = "Identity", code = encoded },
                 protocol: Request.Scheme);
 
-            await emailSender.SendEmailAsync(user.Email!, "Reset your GRID password",
-                $"An admin has requested a password reset for your account. <a href='{System.Text.Encodings.Web.HtmlEncoder.Default.Encode(callbackUrl)}'>Click here to reset your password</a>.");
+            if (string.IsNullOrEmpty(callbackUrl))
+            {
+                logger.LogError("Failed to generate password reset URL for user {UserId} (scheme: {Scheme}, host: {Host})",
+                    userId, Request.Scheme, Request.Host);
+                TempData["ErrorMessage"] = "Could not generate a reset link. Check server logs.";
+                return RedirectToPage();
+            }
+
+            try
+            {
+                await emailSender.SendEmailAsync(user.Email!, "Reset your GRID password",
+                    $"An admin has requested a password reset for your account. <a href='{System.Text.Encodings.Web.HtmlEncoder.Default.Encode(callbackUrl)}'>Click here to reset your password</a>.");
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Failed to send password reset email to {Email}", user.Email);
+                TempData["ErrorMessage"] = $"Failed to send reset email to {user.Email}. Check server logs.";
+                return RedirectToPage();
+            }
 
             var actor = User.Identity?.Name;
             var actorId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;

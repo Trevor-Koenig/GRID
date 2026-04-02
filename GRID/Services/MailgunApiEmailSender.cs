@@ -5,7 +5,7 @@ namespace GRID.Services
     using System.Net.Http.Headers;
     using System.Text;
 
-    public class MailgunApiEmailSender(IHttpClientFactory httpClientFactory, IConfiguration config) : IExtendedEmailSender
+    public class MailgunApiEmailSender(IHttpClientFactory httpClientFactory, IConfiguration config, ILogger<MailgunApiEmailSender> logger) : IExtendedEmailSender
     {
         public Task SendEmailAsync(string email, string subject, string htmlMessage)
             => SendEmailAsync(email, subject, htmlMessage, replyTo: null);
@@ -13,16 +13,20 @@ namespace GRID.Services
         public async Task SendEmailAsync(string email, string subject, string htmlMessage, string? replyTo)
         {
             var mailgun = config.GetSection("Mailgun");
+            var domain  = mailgun["Domain"];
+            var apiKey  = mailgun["ApiKey"];
+
+            logger.LogInformation("Sending email via Mailgun to {Email} (domain: {Domain})", email, domain);
 
             using var httpClient = httpClientFactory.CreateClient();
 
             var request = new HttpRequestMessage(
                 HttpMethod.Post,
-                $"https://api.mailgun.net/v3/{mailgun["Domain"]}/messages"
+                $"https://api.mailgun.net/v3/{domain}/messages"
             );
 
             var authToken = Convert.ToBase64String(
-                Encoding.ASCII.GetBytes($"api:{mailgun["ApiKey"]}")
+                Encoding.ASCII.GetBytes($"api:{apiKey}")
             );
 
             request.Headers.Authorization =
@@ -30,10 +34,10 @@ namespace GRID.Services
 
             var fields = new Dictionary<string, string>
             {
-                ["from"] = $"{mailgun["FromName"]} <{mailgun["FromEmail"]}>",
-                ["to"] = email,
+                ["from"]    = $"{mailgun["FromName"]} <{mailgun["FromEmail"]}>",
+                ["to"]      = email,
                 ["subject"] = subject,
-                ["html"] = htmlMessage
+                ["html"]    = htmlMessage
             };
 
             if (!string.IsNullOrWhiteSpace(replyTo))
@@ -42,6 +46,13 @@ namespace GRID.Services
             request.Content = new FormUrlEncodedContent(fields);
 
             var response = await httpClient.SendAsync(request);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var body = await response.Content.ReadAsStringAsync();
+                logger.LogError("Mailgun returned {StatusCode}: {Body}", (int)response.StatusCode, body);
+            }
+
             response.EnsureSuccessStatusCode();
         }
     }
