@@ -446,6 +446,22 @@ a:hover > .admin-stat-card {
 .docs-content th, .docs-content td { padding: 0.5rem 0.75rem; border: 1px solid rgba(128,128,128,0.2); }
 .docs-content blockquote { border-left: 3px solid rgba(128,128,128,0.4); padding-left: 1rem; opacity: 0.8; margin-bottom: 1rem; }
 
+/* 2FA QR code — fixed size with quiet zone so cameras can always focus */
+#qrCode {
+    width: 250px !important;
+    height: 250px !important;
+    flex-shrink: 0;
+    background: #fff;
+    padding: 12px;
+    border-radius: 6px;
+    box-sizing: content-box;
+}
+
+#qrCode img,
+#qrCode canvas {
+    display: block;
+}
+
 /* Mobile nav logout button styled as a plain link */
 .nav-link-btn {
     background: none;
