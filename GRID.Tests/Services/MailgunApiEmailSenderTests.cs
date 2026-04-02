@@ -62,7 +62,8 @@ public class MailgunApiEmailSenderTests
     {
         var handler = new CapturingHandler(status);
         var factory = new StubHttpClientFactory(handler);
-        var sender  = new MailgunApiEmailSender(factory, config ?? BuildConfig());
+        var logger  = Microsoft.Extensions.Logging.Abstractions.NullLogger<MailgunApiEmailSender>.Instance;
+        var sender  = new MailgunApiEmailSender(factory, config ?? BuildConfig(), logger);
         return (sender, handler);
     }
 
