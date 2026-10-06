@@ -40,6 +40,61 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options =>
 })
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
+
+// External (OAuth/OIDC) login providers — each is only registered when its
+// ClientId and ClientSecret are configured, e.g. Authentication__Google__ClientId.
+// Origins are collected so the CSP form-action directive can allow the redirect.
+var externalLoginOrigins = new List<string>();
+var authBuilder = builder.Services.AddAuthentication();
+
+var googleConfig = builder.Configuration.GetSection("Authentication:Google");
+if (!string.IsNullOrWhiteSpace(googleConfig["ClientId"]) && !string.IsNullOrWhiteSpace(googleConfig["ClientSecret"]))
+{
+    authBuilder.AddGoogle(options =>
+    {
+        options.ClientId = googleConfig["ClientId"]!;
+        options.ClientSecret = googleConfig["ClientSecret"]!;
+    });
+    externalLoginOrigins.Add("https://accounts.google.com");
+}
+
+var microsoftConfig = builder.Configuration.GetSection("Authentication:Microsoft");
+if (!string.IsNullOrWhiteSpace(microsoftConfig["ClientId"]) && !string.IsNullOrWhiteSpace(microsoftConfig["ClientSecret"]))
+{
+    authBuilder.AddMicrosoftAccount(options =>
+    {
+        options.ClientId = microsoftConfig["ClientId"]!;
+        options.ClientSecret = microsoftConfig["ClientSecret"]!;
+    });
+    externalLoginOrigins.Add("https://login.microsoftonline.com");
+    externalLoginOrigins.Add("https://login.live.com");
+}
+
+// Authentik: Authority is the provider's issuer URL, e.g. https://auth.example.com/application/o/grid/
+var authentikConfig = builder.Configuration.GetSection("Authentication:Authentik");
+if (!string.IsNullOrWhiteSpace(authentikConfig["Authority"]) &&
+    !string.IsNullOrWhiteSpace(authentikConfig["ClientId"]) &&
+    !string.IsNullOrWhiteSpace(authentikConfig["ClientSecret"]))
+{
+    authBuilder.AddOpenIdConnect("Authentik", authentikConfig["DisplayName"] ?? "Authentik", options =>
+    {
+        options.SignInScheme = IdentityConstants.ExternalScheme;
+        options.Authority = authentikConfig["Authority"];
+        options.ClientId = authentikConfig["ClientId"];
+        options.ClientSecret = authentikConfig["ClientSecret"];
+        options.CallbackPath = "/signin-authentik";
+        options.SignedOutCallbackPath = "/signout-callback-authentik";
+        options.ResponseType = "code";
+        options.UsePkce = true;
+        options.GetClaimsFromUserInfoEndpoint = true;
+        options.Scope.Clear();
+        options.Scope.Add("openid");
+        options.Scope.Add("profile");
+        options.Scope.Add("email");
+    });
+    externalLoginOrigins.Add(new Uri(authentikConfig["Authority"]!).GetLeftPart(UriPartial.Authority));
+}
+
 builder.Services.AddRazorPages(options =>
 {
     options.Conventions.AuthorizeFolder("/Admin", "AdminOnly");
@@ -228,6 +283,7 @@ app.Services.GetRequiredService<ILoggerFactory>()
 app.UseForwardedHeaders();
 
 // Security headers on every response
+var formActionSources = string.Join(" ", externalLoginOrigins.Prepend("'self'"));
 app.Use(async (context, next) =>
 {
     var headers = context.Response.Headers;
@@ -243,7 +299,9 @@ app.Use(async (context, next) =>
         "font-src 'self' data: https://cdn.jsdelivr.net; " +
         "connect-src 'self'; " +
         "frame-ancestors 'none'; " +
-        "form-action 'self'; " +
+        // External login posts to /ExternalLogin, which redirects to the provider —
+        // browsers apply form-action to that redirect, so provider origins must be listed.
+        $"form-action {formActionSources}; " +
         "base-uri 'self';";
     await next();
 });
@@ -270,6 +328,9 @@ app.UseRouting();
 
 app.UseRateLimiter();
 
+// Explicit so it runs after UseForwardedHeaders — otherwise the auto-inserted
+// middleware builds OAuth redirect URIs from the proxy's http scheme/host.
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseMiddleware<GRID.Middleware.AdminTwoFactorMiddleware>();

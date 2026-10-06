@@ -18,6 +18,14 @@ services:
     environment:
       - ConnectionStrings__DefaultConnection=${CONNECTION_STRING}
       - Mailgun__ApiKey=${MAILGUN_API_KEY}
+      # External login providers — leave unset to disable a provider
+      - Authentication__Google__ClientId=${GOOGLE_CLIENT_ID:-}
+      - Authentication__Google__ClientSecret=${GOOGLE_CLIENT_SECRET:-}
+      - Authentication__Microsoft__ClientId=${MICROSOFT_CLIENT_ID:-}
+      - Authentication__Microsoft__ClientSecret=${MICROSOFT_CLIENT_SECRET:-}
+      - Authentication__Authentik__Authority=${AUTHENTIK_AUTHORITY:-}
+      - Authentication__Authentik__ClientId=${AUTHENTIK_CLIENT_ID:-}
+      - Authentication__Authentik__ClientSecret=${AUTHENTIK_CLIENT_SECRET:-}
     build:
       context: .
       dockerfile: GRID/Dockerfile

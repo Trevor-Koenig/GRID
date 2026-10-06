@@ -41,7 +41,8 @@
         private string GenerateRandomCode(int length)
         {
             const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-            return new string(Enumerable.Range(0, length).Select(_ => chars[Random.Shared.Next(chars.Length)]).ToArray());
+            // Cryptographic RNG — invite codes gate registration, so they must not be predictable
+            return System.Security.Cryptography.RandomNumberGenerator.GetString(chars, length);
         }
 
         /// <summary>
@@ -82,6 +83,16 @@
 
             return (0, invite);
         }
+
+        /// <summary>Maps a non-zero <see cref="ValidateInviteAsync"/> result code to a user-facing message.</summary>
+        public static string DescribeValidationError(int code) => code switch
+        {
+            1 => "Invite code does not exist.",
+            2 => "Invite code expired.",
+            3 => "Invite code has already been used.",
+            4 => "Invite code has reached max uses.",
+            _ => "Invalid or expired invite code."
+        };
 
         public async Task<(bool Success, string? Role)> ConsumeInviteAsync(
                                                             string code,

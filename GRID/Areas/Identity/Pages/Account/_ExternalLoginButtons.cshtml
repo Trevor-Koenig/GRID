@@ -1,0 +1,28 @@
+@using Microsoft.AspNetCore.Authentication
+@model (IList<AuthenticationScheme> Schemes, string ReturnUrl)
+
+@if (Model.Schemes?.Count > 0)
+{
+    <div class="d-flex align-items-center my-3 text-muted">
+        <hr class="flex-grow-1" />
+        <span class="px-2 small">or continue with</span>
+        <hr class="flex-grow-1" />
+    </div>
+    <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+        <div class="d-grid gap-2">
+            @foreach (var provider in Model.Schemes)
+            {
+                var icon = provider.Name switch
+                {
+                    "Google" => "bi bi-google",
+                    "Microsoft" => "bi bi-microsoft",
+                    _ => "bi bi-shield-lock"
+                };
+                <button type="submit" class="btn btn-outline-secondary" name="provider" value="@provider.Name"
+                        title="Log in using your @provider.DisplayName account">
+                    <i class="@icon me-2"></i>@provider.DisplayName
+                </button>
+            }
+        </div>
+    </form>
+}
