@@ -120,7 +120,7 @@
 </div>
 
 @section Scripts {
-    <script>
+    <script nonce="@ViewContext.HttpContext.GetCspNonce()">
         document.getElementById('deleteRoleModal').addEventListener('show.bs.modal', function (event) {
             const btn = event.relatedTarget;
             document.getElementById('deleteRoleId').value = btn.dataset.roleId;

@@ -129,7 +129,7 @@ namespace GRID.Areas.Identity.Pages.Account
                     }
                 }
 
-                var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
+                var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: true);
 
                 var rawIp = HttpContext.Connection.RemoteIpAddress;
                 var ip = rawIp?.IsIPv4MappedToIPv6 == true ? rawIp.MapToIPv4().ToString() : rawIp?.ToString();

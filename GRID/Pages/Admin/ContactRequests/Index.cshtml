@@ -24,7 +24,7 @@
                     <input type="text" name="search" class="form-control form-control-sm" style="max-width:240px;"
                            placeholder="Search name, email, subject..." value="@Model.Search" />
                     <select name="status" class="form-select form-select-sm" style="max-width:160px;"
-                            onchange="this.form.submit()">
+                            data-autosubmit>
                         <option value="" selected="@(string.IsNullOrEmpty(Model.Status))">All</option>
                         <option value="pending" selected="@(Model.Status == "pending")">Pending</option>
                         <option value="responded" selected="@(Model.Status == "responded")">Responded</option>
@@ -229,7 +229,10 @@
 </div>
 
 @section Scripts {
-    <script>
+    <script nonce="@ViewContext.HttpContext.GetCspNonce()">
+        document.querySelectorAll('select[data-autosubmit]').forEach(el =>
+            el.addEventListener('change', () => el.form.submit()));
+
         document.querySelectorAll('time.local-time').forEach(el => {
             const date = new Date(el.getAttribute('datetime'));
             el.textContent = date.toLocaleString(undefined, {

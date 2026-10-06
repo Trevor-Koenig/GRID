@@ -194,7 +194,7 @@
 </div>
 
 @section Scripts {
-    <script>
+    <script nonce="@ViewContext.HttpContext.GetCspNonce()">
         document.getElementById('editRoleModal').addEventListener('show.bs.modal', function (event) {
             const btn = event.relatedTarget;
             document.getElementById('modalUserId').value = btn.dataset.userId;

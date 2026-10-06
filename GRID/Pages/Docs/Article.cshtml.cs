@@ -1,6 +1,7 @@
 using GRID.Data;
 using GRID.Models;
 using GRID.Services;
+using Ganss.Xss;
 using Markdig;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -21,6 +22,22 @@ namespace GRID.Pages.Docs
         private static readonly MarkdownPipeline Pipeline =
             new MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
 
+        // Articles may contain inline HTML, so strip anything executable (scripts, event
+        // handlers, javascript: URLs) before the page outputs it with Html.Raw.
+        private static readonly HtmlSanitizer Sanitizer = CreateSanitizer();
+
+        private static HtmlSanitizer CreateSanitizer()
+        {
+            var sanitizer = new HtmlSanitizer();
+            sanitizer.AllowedAttributes.Add("id"); // heading anchors from auto-identifiers
+            // Task-list checkboxes: <input type="checkbox" disabled>
+            sanitizer.AllowedTags.Add("input");
+            sanitizer.AllowedAttributes.Add("type");
+            sanitizer.AllowedAttributes.Add("checked");
+            sanitizer.AllowedAttributes.Add("disabled");
+            return sanitizer;
+        }
+
         public async Task<IActionResult> OnGetAsync(string category, string slug, bool edit = false)
         {
             CanViewPrivate = (await auth.AuthorizeAsync(User, null, "CanViewPrivateDocs")).Succeeded;
@@ -37,7 +54,7 @@ namespace GRID.Pages.Docs
 
             Article = article;
             EditMode = IsAdmin && edit;
-            RenderedContent = Markdown.ToHtml(Article.Content, Pipeline);
+            RenderedContent = Sanitizer.Sanitize(Markdown.ToHtml(Article.Content, Pipeline));
 
             var sidebarQuery = db.DocArticles.AsQueryable();
             if (!IsAdmin) sidebarQuery = sidebarQuery.Where(d => d.IsPublished);

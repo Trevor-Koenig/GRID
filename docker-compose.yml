@@ -1,23 +1,29 @@
 services:
 
   db:
-    image: postgres:latest
+    # Pin the major version — Postgres can't start on a data directory from a different major.
+    # 18+ keeps its data under /var/lib/postgresql/<major>/docker, so mount the parent directory.
+    image: postgres:${POSTGRES_VERSION:-18}
     container_name: db
+    user: "${PUID:-1000}:${PGID:-1000}"
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DB=grid
-    ports:
-      - 5432:5432
-    
+    # No published port — the app reaches the database over the compose network.
+    volumes:
+      - ${DATA_DIR:-./data}/postgres:/var/lib/postgresql
     restart: always
 
   grid:
     image: ${DOCKER_REGISTRY-}grid
     container_name: grid
+    user: "${PUID:-1000}:${PGID:-1000}"
     environment:
       - ConnectionStrings__DefaultConnection=${CONNECTION_STRING}
       - Mailgun__ApiKey=${MAILGUN_API_KEY}
+      - AllowedHosts=${ALLOWED_HOSTS:-*}
+      - ForwardedHeaders__KnownNetworks=${TRUSTED_PROXY_NETWORKS:-}
       # External login providers — leave unset to disable a provider
       - Authentication__Google__ClientId=${GOOGLE_CLIENT_ID:-}
       - Authentication__Google__ClientSecret=${GOOGLE_CLIENT_SECRET:-}
@@ -30,12 +36,8 @@ services:
       context: .
       dockerfile: GRID/Dockerfile
     ports:
-      - 35510:8080
-      - 35511:8081
+      - ${GRID_BIND_ADDRESS:-127.0.0.1}:35510:8080
     volumes:
-      - grid_keys:/app/keys
+      - ${DATA_DIR:-./data}/keys:/app/keys
     depends_on:
       - db
-
-volumes:
-  grid_keys:

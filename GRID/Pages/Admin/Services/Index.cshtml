@@ -326,7 +326,7 @@
 </div>
 
 @section Scripts {
-    <script>
+    <script nonce="@ViewContext.HttpContext.GetCspNonce()">
         document.getElementById('editServiceModal').addEventListener('show.bs.modal', function (e) {
             const b = e.relatedTarget;
             document.getElementById('editServiceId').value = b.dataset.serviceId;

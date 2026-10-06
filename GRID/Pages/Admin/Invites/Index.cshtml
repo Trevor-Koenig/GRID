@@ -243,7 +243,7 @@
 </div>
 
 @section Scripts {
-    <script>
+    <script nonce="@ViewContext.HttpContext.GetCspNonce()">
         // Delete modal population
         document.getElementById('deleteInviteModal').addEventListener('show.bs.modal', function (event) {
             const btn = event.relatedTarget;

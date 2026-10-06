@@ -214,7 +214,7 @@
 </section>
 
 @section Scripts {
-    <script>
+    <script nonce="@ViewContext.HttpContext.GetCspNonce()">
         // Ensure the page is loaded with the client's timezone offset so the
         // server can bucket page views into the correct local days.
         // getTimezoneOffset() returns minutes behind UTC (e.g. UTC-8 → 480).

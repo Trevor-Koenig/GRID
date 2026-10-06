@@ -1,7 +1,9 @@
 using GRID.Authorization;
 using GRID.Data;
+using GRID.Middleware;
 using GRID.Models;
 using GRID.Services;
+using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -37,6 +39,11 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options =>
 {
     options.SignIn.RequireConfirmedAccount = !builder.Environment.IsDevelopment();
     options.User.RequireUniqueEmail = true;
+    // Lock the account after repeated failed passwords — the per-IP login limiter alone
+    // doesn't stop guessing spread across many IPs.
+    options.Lockout.MaxFailedAccessAttempts = 5;
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
+    options.Lockout.AllowedForNewUsers = true;
 })
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
@@ -261,9 +268,23 @@ builder.Services.AddRateLimiter(options =>
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
     options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost;
-    // Clear both lists so any upstream proxy (Docker bridge, reverse proxy) is trusted
-    options.KnownIPNetworks.Clear();
-    options.KnownProxies.Clear();
+
+    // Only honour X-Forwarded-* from the reverse proxy; anyone else could spoof their IP
+    // to dodge the per-IP rate limits and forge audit log entries. Loopback stays trusted
+    // (framework default). ForwardedHeaders:KnownNetworks is a comma-separated list of IPs
+    // and CIDRs; when unset, the private ranges (Docker bridge, LAN proxy) are trusted.
+    var trusted = builder.Configuration["ForwardedHeaders:KnownNetworks"];
+    var entries = string.IsNullOrWhiteSpace(trusted)
+        ? ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", "fc00::/7"]
+        : trusted.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+    foreach (var entry in entries)
+    {
+        if (entry.Contains('/'))
+            options.KnownIPNetworks.Add(System.Net.IPNetwork.Parse(entry));
+        else
+            options.KnownProxies.Add(System.Net.IPAddress.Parse(entry));
+    }
 });
 
 /***********************************
@@ -293,7 +314,8 @@ app.Use(async (context, next) =>
     headers["X-XSS-Protection"] = "0";
     headers["Content-Security-Policy"] =
         "default-src 'self'; " +
-        "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; " +
+        // Inline scripts run only with this request's nonce (see CspNonce).
+        $"script-src 'self' 'nonce-{context.GetCspNonce()}' https://cdn.jsdelivr.net; " +
         "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; " +
         "img-src 'self' data:; " +
         "font-src 'self' data: https://cdn.jsdelivr.net; " +
@@ -341,8 +363,10 @@ app.MapRazorPages()
    .WithStaticAssets();
 
 // Theme preference API
-app.MapPost("/api/theme", async (HttpContext ctx, ApplicationDbContext db, string theme) =>
+app.MapPost("/api/theme", async (HttpContext ctx, ApplicationDbContext db, IAntiforgery antiforgery, string theme) =>
 {
+    // site.js sends the page's antiforgery token in the RequestVerificationToken header
+    if (!await antiforgery.IsRequestValidAsync(ctx)) return Results.BadRequest();
     if (theme != "dark" && theme != "light") return Results.BadRequest();
     var userId = ctx.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
     if (userId == null) return Results.Unauthorized();

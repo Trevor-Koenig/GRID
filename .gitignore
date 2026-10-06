@@ -366,3 +366,6 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /.claude/settings.local.json
+
+# Docker bind-mounted data (database files, data-protection keys)
+/data/

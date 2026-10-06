@@ -195,7 +195,7 @@
 </section>
 
 @section Scripts {
-    <script>
+    <script nonce="@ViewContext.HttpContext.GetCspNonce()">
         document.querySelectorAll('[data-utc]').forEach(function (el) {
             var d = new Date(el.dataset.utc);
             el.textContent = d.toLocaleString(undefined, {

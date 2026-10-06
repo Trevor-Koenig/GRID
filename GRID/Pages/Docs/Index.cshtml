@@ -230,7 +230,7 @@
     </datalist>
 
     @section Scripts {
-        <script>
+        <script nonce="@ViewContext.HttpContext.GetCspNonce()">
             document.getElementById('deleteDocModal').addEventListener('show.bs.modal', function (e) {
                 const b = e.relatedTarget;
                 document.getElementById('deleteDocId').value = b.dataset.docId;

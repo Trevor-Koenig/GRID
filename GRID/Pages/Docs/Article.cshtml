@@ -263,7 +263,7 @@
 {
     @section Scripts {
         <script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
-        <script>
+        <script nonce="@ViewContext.HttpContext.GetCspNonce()">
             var easyMDE = new EasyMDE({
                 element: document.getElementById('contentEditor'),
                 spellChecker: false,
