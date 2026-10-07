@@ -10,6 +10,8 @@ namespace GRID.Models
         public const string AdminContacts = "admin.contacts";
         public const string AdminServices = "admin.services";
         public const string AdminAuditLog = "admin.auditlog";
+        // Restoring a backup replaces the whole database, so it gets its own permission
+        public const string AdminBackups = "admin.backups";
 
         // Service usage
         public const string ServicesUse = "services.use";
@@ -27,6 +29,7 @@ namespace GRID.Models
             AdminContacts,
             AdminServices,
             AdminAuditLog,
+            AdminBackups,
             AdminDocs,
             ServicesUse,
             DocsView,
@@ -41,6 +44,7 @@ namespace GRID.Models
             [AdminContacts] = "Manage Contact Requests",
             [AdminServices] = "Manage Services",
             [AdminAuditLog] = "View Audit Log",
+            [AdminBackups]  = "Manage Database Backups",
             [AdminDocs]     = "Manage Documentation",
             [ServicesUse]   = "Use Quick Services",
             [DocsView]      = "View Private Documentation",

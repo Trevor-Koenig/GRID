@@ -22,6 +22,8 @@ public class PermissionsTests
     [Fact]
     public void AdminAuditLog_HasExpectedValue() => Permissions.AdminAuditLog.Should().Be("admin.auditlog");
     [Fact]
+    public void AdminBackups_HasExpectedValue()  => Permissions.AdminBackups.Should().Be("admin.backups");
+    [Fact]
     public void ServicesUse_HasExpectedValue()   => Permissions.ServicesUse.Should().Be("services.use");
     [Fact]
     public void DocsView_HasExpectedValue()      => Permissions.DocsView.Should().Be("docs.view");
@@ -31,9 +33,9 @@ public class PermissionsTests
     // ── All array ─────────────────────────────────────────────────────────────
 
     [Fact]
-    public void All_ContainsExactlyTenPermissions()
+    public void All_ContainsExactlyElevenPermissions()
     {
-        Permissions.All.Should().HaveCount(10);
+        Permissions.All.Should().HaveCount(11);
     }
 
     [Fact]
@@ -50,6 +52,7 @@ public class PermissionsTests
     [InlineData(Permissions.AdminContacts)]
     [InlineData(Permissions.AdminServices)]
     [InlineData(Permissions.AdminAuditLog)]
+    [InlineData(Permissions.AdminBackups)]
     [InlineData(Permissions.ServicesUse)]
     [InlineData(Permissions.DocsView)]
     [InlineData(Permissions.AdminDocs)]

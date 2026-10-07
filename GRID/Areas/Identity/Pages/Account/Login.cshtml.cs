@@ -9,6 +9,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using GRID.Data;
 using GRID.Models;
+using GRID.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
@@ -62,6 +63,13 @@ namespace GRID.Areas.Identity.Pages.Account
         [TempData]
         public string ErrorMessage { get; set; }
 
+        // Set after a database restore (admin Backups page or /Setup/Restore)
+        [TempData]
+        public string StatusMessage { get; set; }
+
+        // No accounts yet: offer restoring a backup instead
+        public bool IsFreshInstall { get; set; }
+
         /// <summary>
         ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
         ///     directly from your code. This API may change or be removed in future releases.
@@ -105,6 +113,7 @@ namespace GRID.Areas.Identity.Pages.Account
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
 
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+            IsFreshInstall = await SetupService.IsFreshInstallAsync(_db);
 
             ReturnUrl = returnUrl;
         }

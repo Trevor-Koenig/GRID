@@ -1,0 +1,76 @@
+@page
+@model GRID.Pages.Setup.RestoreModel
+
+@{
+    ViewData["Title"] = "Restore Backup";
+}
+
+<div class="auth-bg">
+    <img src="~/images/hero/bannerDarkReduced.webp" class="dark-theme auth-bg-img" alt="">
+    <img src="~/images/hero/bannerLightReduced.webp" class="light-theme auth-bg-img" alt="">
+    <div class="auth-bg-overlay"></div>
+    <div class="auth-card-wrapper">
+        <div class="auth-card">
+            <a href="/" class="auth-logo">
+                <h1 class="sitename">GRID<span>.</span></h1>
+            </a>
+            <h2>Restore a backup</h2>
+            <p class="text-muted" style="font-size:0.9rem;">
+                This install has no accounts yet. Load a GRID database backup to bring over
+                the accounts, roles, invites, services and docs from another install.
+            </p>
+
+            @if (Model.ErrorMessage != null)
+            {
+                <div class="alert alert-danger mb-3" role="alert" style="white-space:pre-line;">@Model.ErrorMessage</div>
+            }
+
+            <form method="post" enctype="multipart/form-data" id="setupRestoreForm">
+                <div class="form-floating mb-3">
+                    <input name="setupCode" id="setupCode" class="form-control" autocomplete="off" required placeholder="XXXX-XXXX-XXXX" />
+                    <label for="setupCode">Setup code</label>
+                    <div class="form-text">Printed in the GRID container log at startup.</div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="backupFile" class="form-label">Upload a backup (<code>.sql</code> or <code>.sql.gz</code>)</label>
+                    <input type="file" name="file" id="backupFile" class="form-control" accept=".sql,.gz" />
+                </div>
+
+                @if (Model.ServerBackups.Any())
+                {
+                    <div class="form-floating mb-3">
+                        <select name="existingBackup" id="existingBackup" class="form-select">
+                            <option value="">—</option>
+                            @foreach (var backup in Model.ServerBackups)
+                            {
+                                <option value="@backup.Name">@backup.Name</option>
+                            }
+                        </select>
+                        <label for="existingBackup">…or use one already on the server</label>
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted" style="font-size:0.8rem;">
+                        Large backup? Copy the <code>.sql</code> or <code>.sql.gz</code> file into the host's backups folder
+                        (<code>@Model.BackupDirectory</code> in the container) and reload this page to pick it from a list.
+                    </p>
+                }
+
+                <button type="submit" class="w-100 btn btn-lg btn-primary mb-3" id="setupRestoreSubmit">Restore</button>
+                <a asp-area="Identity" asp-page="/Account/Login" class="d-block py-2 fs-6">Back to log in</a>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script nonce="@ViewContext.HttpContext.GetCspNonce()">
+        document.getElementById('setupRestoreForm').addEventListener('submit', function () {
+            const btn = document.getElementById('setupRestoreSubmit');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Restoring…';
+        });
+    </script>
+}

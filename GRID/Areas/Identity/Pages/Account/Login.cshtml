@@ -15,6 +15,15 @@
                 <h1 class="sitename">GRID<span>.</span></h1>
             </a>
             <h2>Welcome back</h2>
+            <partial name="_StatusMessage" model="Model.StatusMessage" />
+            @if (Model.IsFreshInstall)
+            {
+                <div class="alert alert-info mb-3" role="note">
+                    <i class="bi bi-database-up me-1"></i>
+                    No accounts exist yet. Moving an existing install?
+                    <a asp-page="/Setup/Restore" asp-area="">Restore a backup</a>
+                </div>
+            }
             <form id="account" method="post">
                 <div asp-validation-summary="ModelOnly" class="text-danger mb-3" role="alert"></div>
                 <div class="form-floating mb-3">

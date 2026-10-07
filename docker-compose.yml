@@ -1,29 +1,45 @@
+# Production stack. Values come from .env next to this file (see .env.example).
+# Local/Visual Studio builds: docker-compose.override.yml adds `build:` and Development mode —
+# don't copy that file to a server, `docker compose` picks it up automatically.
 services:
 
   db:
     # Pin the major version — Postgres can't start on a data directory from a different major.
     # 18+ keeps its data under /var/lib/postgresql/<major>/docker, so mount the parent directory.
     image: postgres:${POSTGRES_VERSION:-18}
-    container_name: db
+    # Not just "db": container names are global on the host and other apps use that one.
+    container_name: grid-db
     user: "${PUID:-1000}:${PGID:-1000}"
     environment:
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_USER=${POSTGRES_USER:-grid}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
       - POSTGRES_DB=grid
     # No published port — the app reaches the database over the compose network.
     volumes:
       - ${DATA_DIR:-./data}/postgres:/var/lib/postgresql
-    restart: always
+    healthcheck:
+      # Over TCP: during first-run init Postgres only listens on its socket, so this stays
+      # unhealthy until the real server is up.
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U \"$$POSTGRES_USER\" -d grid"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 2m
+    restart: unless-stopped
 
   grid:
-    image: ${DOCKER_REGISTRY-}grid
+    image: ${GRID_IMAGE:-trevorkoenig/grid}:${GRID_VERSION:-latest}
     container_name: grid
     user: "${PUID:-1000}:${PGID:-1000}"
     environment:
-      - ConnectionStrings__DefaultConnection=${CONNECTION_STRING}
+      # Built from the POSTGRES_* values unless CONNECTION_STRING is set.
+      - ConnectionStrings__DefaultConnection=${CONNECTION_STRING:-Host=db;Port=5432;Database=grid;Username=${POSTGRES_USER:-grid};Password=${POSTGRES_PASSWORD}}
       - Mailgun__ApiKey=${MAILGUN_API_KEY}
       - AllowedHosts=${ALLOWED_HOSTS:-*}
       - ForwardedHeaders__KnownNetworks=${TRUSTED_PROXY_NETWORKS:-}
+      # Database backups — see the Backups page in the admin dashboard
+      - Backup__IntervalHours=${BACKUP_INTERVAL_HOURS:-24}
+      - Backup__KeepAutomatic=${BACKUP_KEEP_AUTOMATIC:-14}
       # External login providers — leave unset to disable a provider
       - Authentication__Google__ClientId=${GOOGLE_CLIENT_ID:-}
       - Authentication__Google__ClientSecret=${GOOGLE_CLIENT_SECRET:-}
@@ -32,12 +48,12 @@ services:
       - Authentication__Authentik__Authority=${AUTHENTIK_AUTHORITY:-}
       - Authentication__Authentik__ClientId=${AUTHENTIK_CLIENT_ID:-}
       - Authentication__Authentik__ClientSecret=${AUTHENTIK_CLIENT_SECRET:-}
-    build:
-      context: .
-      dockerfile: GRID/Dockerfile
     ports:
       - ${GRID_BIND_ADDRESS:-127.0.0.1}:35510:8080
     volumes:
       - ${DATA_DIR:-./data}/keys:/app/keys
+      - ${BACKUP_DIR:-${DATA_DIR:-./data}/backups}:/app/backups
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+    restart: unless-stopped

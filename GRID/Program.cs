@@ -113,6 +113,7 @@ builder.Services.AddRazorPages(options =>
     options.Conventions.AuthorizeFolder("/Admin/Services", "ManageServices");
     options.Conventions.AuthorizeFolder("/Admin/AuditLog", "ViewAuditLog");
     options.Conventions.AuthorizeFolder("/Admin/Docs", "ManageDocs");
+    options.Conventions.AuthorizeFolder("/Admin/Backups", "ManageBackups");
 });
 builder.Services.AddAuthorizationBuilder()
     .AddPolicy("AdminOnly", policy => policy.AddRequirements(new PermissionRequirement(Permissions.AdminAccess)))
@@ -124,6 +125,7 @@ builder.Services.AddAuthorizationBuilder()
     .AddPolicy("ManageServices", policy => policy.AddRequirements(new PermissionRequirement(Permissions.AdminServices)))
     .AddPolicy("ViewAuditLog", policy => policy.AddRequirements(new PermissionRequirement(Permissions.AdminAuditLog)))
     .AddPolicy("ManageDocs", policy => policy.AddRequirements(new PermissionRequirement(Permissions.AdminDocs)))
+    .AddPolicy("ManageBackups", policy => policy.AddRequirements(new PermissionRequirement(Permissions.AdminBackups)))
     .AddPolicy("CanViewPrivateDocs", policy => policy.AddRequirements(new PermissionRequirement(Permissions.DocsView)));
 
 /***********************************
@@ -168,6 +170,11 @@ builder.Services.AddHostedService(p => p.GetRequiredService<ServiceStatusService
 
 // weekly contact request reminder
 builder.Services.AddHostedService<ContactRequestReminderService>();
+
+// database backups (manual, scheduled, restore) and fresh-install restore
+builder.Services.AddSingleton<BackupService>();
+builder.Services.AddHostedService<BackupSchedulerService>();
+builder.Services.AddSingleton<SetupService>();
 
 
 /***********************************
@@ -328,6 +335,21 @@ app.Use(async (context, next) =>
     await next();
 });
 
+// While a restore swaps out the database, answer everything else with 503 rather than
+// letting requests read or write half-restored tables.
+var backupService = app.Services.GetRequiredService<BackupService>();
+app.Use(async (context, next) =>
+{
+    if (backupService.IsRestoring)
+    {
+        context.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
+        context.Response.Headers.RetryAfter = "30";
+        await context.Response.WriteAsync("GRID is restoring a database backup. Try again in a minute.");
+        return;
+    }
+    await next();
+});
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -480,6 +502,14 @@ using (var scope = app.Services.CreateScope())
                 new ServiceLink { Name = "AMP", Token = "xn4a8p", Url = "https://amp.shulker.tech", IconClass = "bi bi-music-note-beamed", Description = "Music streaming", RequiresAuth = true, IsActive = true, ShowInNav = true, ShowInHero = true, ShowInServices = true, DisplayOrder = 4 }
             );
             await context.SaveChangesAsync();
+        }
+
+        if (await SetupService.IsFreshInstallAsync(context))
+        {
+            var setup = services.GetRequiredService<SetupService>();
+            logger.LogWarning(
+                "No accounts exist yet. To restore a database backup, open /Setup/Restore and enter setup code {SetupCode}",
+                setup.DisplayCode);
         }
     }
     catch (Exception ex)

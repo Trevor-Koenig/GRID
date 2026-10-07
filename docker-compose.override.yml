@@ -1,5 +1,10 @@
 services:
   grid:
+    # Build from source instead of pulling the published image (Visual Studio / local dev).
+    image: ${DOCKER_REGISTRY-}grid
+    build:
+      context: .
+      dockerfile: GRID/Dockerfile
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8080
